@@ -1,0 +1,22 @@
+# GUI
+PyQt6
+
+# Neural Networks
+openai
+g4f[all]
+vosk
+torch
+json
+fuzzywuzzy
+
+# System
+sounddevice
+datetime
+webbrowser
+pycaw
+comtypes
+
+# Etc
+configparser
+queue
+num2t4ru

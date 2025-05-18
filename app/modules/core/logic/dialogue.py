@@ -12,7 +12,8 @@ import os
 import config # Модуль конфигурации
 from app.modules.audio.audio_detection import *  # Модуль работы с речью(распознавание)
 from app.modules.audio.audio_speaking import *  # Модуль работы с речью(синтез)
-from app.modules.core.logic.config import BASE_BROWSER
+from app.modules.core.changing_state.sleep import * # Модуль засыпания
+from app.modules.core.changing_state.wake_up import * # Модуль пробуждения
 
 
 # Функция считывания голосовой команды
@@ -91,7 +92,13 @@ def execute_cmd(cmd: str):
             text = config.GREETING_MESSAGE
 
         elif cmd == 'joke': # get joke
-            text = random.choice(config.JOKES)
+            text = random.choice(config.JOKER_LIST)
+
+        elif cmd == 'praise':
+            text = random.choice(config.PRAISE_ANSWER)
+
+        elif cmd == 'censure':
+            text = random.choice(config.CENSURE_ANSWER)
 
     elif cmd in config.VA_VOID_CMD_LIST:
         if cmd == 'current_time': # get current time
@@ -113,6 +120,31 @@ def execute_cmd(cmd: str):
             os.system(config.GOODBYE_DPI_PATH)
             text = random.choice(config.EXECUTE_ANSWER)  # Сообщаем о выполнении команды
 
+        elif cmd == 'sleep':
+            text = random.choice(config.EXECUTE_ANSWER)  # Сообщаем о выполнении команды
+            # os.system("powershell.exe (Get-WmiObject -Class 'win32_volumecontrol').SetVolume(0)")
+
+            sleep() # Засыпание
+
+        elif cmd == 'wake_up':
+            # os.system("powershell.exe (Get-WmiObject -Class 'win32_volumecontrol').SetVolume(60)")
+            wake_up() # Пробуждение
+
+            text = random.choice(config.EXECUTE_ANSWER)  # Сообщаем о выполнении команды
+
+        elif cmd == 'turn_on_music':
+            pass
+            # text = random.choice(config.EXECUTE_ANSWER)  # Сообщаем о выполнении команды
+
+        elif cmd == 'turn_off_music':
+            pass
+            # text = random.choice(config.EXECUTE_ANSWER)  # Сообщаем о выполнении команды
+
+        elif cmd == 'poweroff':
+            va_speak(random.choice(config.POWEROFF_MESSAGE_LIST))
+            exit()
+
+    print(f"Ответ от {config.VA_NAME}: {text}")
     va_speak(text)
 
 
@@ -186,3 +218,19 @@ def generate_response(dialogue_history, message, mod, client=Client()): # Пол
     except Exception as e:
         print(f"Произошла ошибка: {str(e)}")
         print(f"Message: {message}")
+
+
+# Функция получения режима работы ассистента
+def get_mod():
+    m = input(config.OPTIONS_MESSAGE)
+
+    while not (m in ['b', 'f']):
+        m = input(config.OPTIONS_MESSAGE)
+
+    else:
+        if m == 'b':
+            mod = "base"
+        elif m == 'f':
+            mod = "free"
+
+    return mod

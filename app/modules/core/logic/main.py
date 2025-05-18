@@ -67,6 +67,8 @@ def main():
     print(generate_response(dialogue_history, "Кто ты?", mod, client))
     if generate_response(dialogue_history, "Кто ты?", mod, client) == None: # Если апи-ключ не работает, то используем свободную модель
         mod = "free"
+    else:
+        mod = get_mod()
 
     # Создание приложения
     app = QApplication(sys.argv)

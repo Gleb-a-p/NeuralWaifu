@@ -7,6 +7,7 @@
 
 
 from PyQt6 import QtCore, QtGui, QtWidgets
+from app.modules.core.logic.config import VA_NAME, VA_VERSION
 
 
 class Ui_MainWindow(object):
@@ -54,6 +55,6 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "Neural Waifu"))
+        MainWindow.setWindowTitle(_translate("MainWindow", f"{VA_NAME} {VA_VERSION}"))
         self.lineEdit.setPlaceholderText(_translate("MainWindow", "Enter your message"))
         self.pushButton.setText(_translate("MainWindow", "Send message"))

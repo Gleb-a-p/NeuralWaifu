@@ -10,7 +10,7 @@ from fuzzywuzzy import fuzz
 import config
 
 
-model = vosk.Model("model") # ("model_small") # модель, распознающая речь
+model = vosk.Model("model_small") # ("model") # ("model_small") # модель, распознающая речь
 samplerate = 16000
 device = 1 # id устройства записи
 
@@ -23,6 +23,7 @@ def q_callback(indata, frames, time, status):
     q.put(bytes(indata))
 
 
+# Функция прослушивания микрофона
 def va_listen(callback, client, dialog, mod):
     with sd.RawInputStream(samplerate=samplerate, blocksize=8000, device=device, dtype='int16',
                            channels=1, callback=q_callback) as stream:
