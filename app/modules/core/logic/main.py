@@ -1,15 +1,22 @@
 # -*-coding: utf-8 -*-
+# This is main file with import of all necessary libraries and functions, you need run this file to run project.
+
 # Импорт библиотек
+from openai import  OpenAI
 from PyQt6.QtWidgets import QApplication, QMainWindow
-from random import randint
+from random import randint, choice
 import configparser
+import webbrowser
+import time
 # import os
-# import sys
+import sys
 
 # Импорт модулей
-import config # Модуль конфигурации
+import app.modules.core.logic.config as config # Модуль конфигурации
 from app.modules.graphics.gui import Ui_MainWindow # Модуль графического интерфейса
-from app.modules.core.logic.dialogue import * # Модуль диалоговой логики(ChatGPT)
+import app.modules.core.logic.dialogue as dialogue # Модуль диалоговой логики(ChatGPT)
+import app.modules.audio.audio_detection as audio_detection # Модуль работы с речью(распознавание)
+import app.modules.audio.audio_speaking as audio_speaking # Модуль работы с речью(синтез)
 
 
 # Класс MainWindow для настройки главного окна приложения
@@ -36,9 +43,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             time.sleep(randint(10, 30) / 1000)
 
             if self.mod == "base":
-                self.listWidget.addItem(generate_response(self.dialog, entered_message, self.mod, self.client))
+                self.listWidget.addItem(dialogue.generate_response(self.dialog, entered_message, self.mod, self.client))
             elif self.mod == "free":
-                self.listWidget.addItem(generate_response(dialogue_history=self.dialog, message=entered_message, mod=self.mod))
+                self.listWidget.addItem(dialogue.generate_response(dialogue_history=self.dialog, message=entered_message, mod=self.mod))
 
             print(self.dialog)
 
@@ -64,11 +71,11 @@ def main():
 
     # Проверка клиента OpenAI на корректность
     mod = "base"
-    print(generate_response(dialogue_history, "Кто ты?", mod, client))
-    if generate_response(dialogue_history, "Кто ты?", mod, client) == None: # Если апи-ключ не работает, то используем свободную модель
+    print(dialogue.generate_response(dialogue_history, "Кто ты?", mod, client))
+    if dialogue.generate_response(dialogue_history, "Кто ты?", mod, client) == None: # Если апи-ключ не работает, то используем свободную модель
         mod = "free"
     else:
-        mod = get_mod()
+        mod = dialogue.get_mod()
 
     # Создание приложения
     app = QApplication(sys.argv)
@@ -94,8 +101,8 @@ def main():
     app.exec()
 
     # Запуск голосового ассистента
-    va_speak(random.choice(config.GREETING_LIST)) # Приветствие при запуске
-    va_listen(va_respond, client, dialogue_history, mod) # Начать прослушивание команд
+    audio_speaking.va_speak(choice(config.GREETING_LIST)) # Приветствие при запуске
+    audio_detection.va_listen(dialogue.va_respond, client, dialogue_history, mod) # Начать прослушивание команд
 
 
 if __name__ == "__main__":

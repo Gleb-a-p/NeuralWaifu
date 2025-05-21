@@ -7,7 +7,7 @@ import json
 from fuzzywuzzy import fuzz
 
 # Импорт модулей
-import config
+import app.modules.core.logic.config as config
 
 
 model = vosk.Model("model_small") # ("model") # ("model_small") # модель, распознающая речь

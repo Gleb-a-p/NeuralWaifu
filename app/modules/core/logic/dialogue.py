@@ -1,7 +1,6 @@
 # Импорт библиотек
 from fuzzywuzzy import fuzz
 from num2t4ru import num2text
-from openai import OpenAI
 from g4f.client import Client
 import datetime
 import webbrowser
@@ -9,17 +8,17 @@ import random
 import os
 
 # Импорт модулей
-import config # Модуль конфигурации
-from app.modules.audio.audio_detection import *  # Модуль работы с речью(распознавание)
-from app.modules.audio.audio_speaking import *  # Модуль работы с речью(синтез)
-from app.modules.core.changing_state.sleep import * # Модуль засыпания
-from app.modules.core.changing_state.wake_up import * # Модуль пробуждения
+import app.modules.core.logic.config as config # Модуль конфигурации
+import app.modules.audio.audio_detection as audio_detection # Модуль работы с речью(распознавание)
+import app.modules.audio.audio_speaking as audio_speaking # Модуль работы с речью(синтез)
+import app.modules.core.changing_state.sleep as sleep # Модуль засыпания
+import app.modules.core.changing_state.wake_up as wake_up# Модуль пробуждения
 
 
 # Функция считывания голосовой команды
 def va_respond(message: str, client, dialogue_history, mod):
     print(message)
-    detected_message = va_wake_word_detection(message) # Распознаем сообщение
+    detected_message = audio_detection.va_wake_word_detection(message) # Распознаем сообщение
 
     if detected_message: # message.startswith(config.VA_WAKE_WORD_LIST):
         if message:
@@ -33,12 +32,12 @@ def va_respond(message: str, client, dialogue_history, mod):
         if ( ( cmd['cmd'] not in config.VA_SPEAKING_CMD_LIST.keys() or cmd['percent'] < config.CMD_PERCENT_DETECTION ) and ( cmd['cmd'] not in config.VA_VOID_CMD_LIST.keys() or cmd['percent'] < config.CMD_PERCENT_DETECTION ) ): # or ( cmd == 'usual_answer' ):
             if mod == "base":
                 try:
-                    va_speak(generate_response(dialogue_history, message, mod, client))
+                    audio_speaking.va_speak(generate_response(dialogue_history, message, mod, client))
                 except Exception as err:
                     print(err)
             elif mod == "free":
                 try:
-                    va_speak(generate_response(dialogue_history=dialogue_history, message=message, mod=mod))
+                    audio_speaking.va_speak(generate_response(dialogue_history=dialogue_history, message=message, mod=mod))
                 except Exception as err:
                     print(err)
         else:
@@ -94,10 +93,10 @@ def execute_cmd(cmd: str):
         elif cmd == 'joke': # get joke
             text = random.choice(config.JOKER_LIST)
 
-        elif cmd == 'praise':
+        elif cmd == 'praise': # reaction for praise
             text = random.choice(config.PRAISE_ANSWER)
 
-        elif cmd == 'censure':
+        elif cmd == 'censure': # reaction for censure
             text = random.choice(config.CENSURE_ANSWER)
 
     elif cmd in config.VA_VOID_CMD_LIST:
@@ -120,32 +119,32 @@ def execute_cmd(cmd: str):
             os.system(config.GOODBYE_DPI_PATH)
             text = random.choice(config.EXECUTE_ANSWER)  # Сообщаем о выполнении команды
 
-        elif cmd == 'sleep':
+        elif cmd == 'sleep': # set volume to minimal value
             text = random.choice(config.EXECUTE_ANSWER)  # Сообщаем о выполнении команды
             # os.system("powershell.exe (Get-WmiObject -Class 'win32_volumecontrol').SetVolume(0)")
 
-            sleep() # Засыпание
+            sleep.sleep() # Засыпание
 
-        elif cmd == 'wake_up':
+        elif cmd == 'wake_up': # set volume to normal value
             # os.system("powershell.exe (Get-WmiObject -Class 'win32_volumecontrol').SetVolume(60)")
-            wake_up() # Пробуждение
+            wake_up.wake_up() # Пробуждение
 
             text = random.choice(config.EXECUTE_ANSWER)  # Сообщаем о выполнении команды
 
-        elif cmd == 'turn_on_music':
+        elif cmd == 'turn_on_music': # turn on random music
             pass
             # text = random.choice(config.EXECUTE_ANSWER)  # Сообщаем о выполнении команды
 
-        elif cmd == 'turn_off_music':
+        elif cmd == 'turn_off_music': # turn off playing music
             pass
             # text = random.choice(config.EXECUTE_ANSWER)  # Сообщаем о выполнении команды
 
-        elif cmd == 'poweroff':
-            va_speak(random.choice(config.POWEROFF_MESSAGE_LIST))
+        elif cmd == 'poweroff': # shut down
+            audio_speaking.va_speak(random.choice(config.POWEROFF_MESSAGE_LIST))
             exit()
 
-    print(f"Ответ от {config.VA_NAME}: {text}")
-    va_speak(text)
+    print(f"Ответ от {config.VA_NAME}: {text}") # Вывод ответа ассистента в консоль
+    audio_speaking.va_speak(text) # Сообщение ответа
 
 
 # Функция корректировки ответа
