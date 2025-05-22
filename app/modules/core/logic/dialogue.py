@@ -104,6 +104,7 @@ def execute_cmd(cmd: str):
             now = datetime.datetime.now()
             text = f"Сейч+ас {num2words.num2words(now.hour, lang=config.LANGUAGE)} {num2words.num2words(now.minute, lang=config.LANGUAGE)}"
 
+
         elif cmd == 'open_browser': # open browser
             # chrome_path = 'C:\Program Files\Google\Chrome\Application\chrome.exe'
             # webbrowser.get(chrome_path).open("http://python.org")

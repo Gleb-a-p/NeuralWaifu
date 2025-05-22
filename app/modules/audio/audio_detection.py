@@ -12,7 +12,6 @@ import app.modules.core.logic.config as config
 
 model = vosk.Model("model_small") # ("model") # ("model_small") # модель, распознающая речь
 samplerate = 16000
-device = 1 # id устройства записи
 
 q = queue.Queue()
 
@@ -25,7 +24,7 @@ def q_callback(indata, frames, time, status):
 
 # Функция прослушивания микрофона
 def va_listen(callback, client, dialog, mod):
-    with sd.RawInputStream(samplerate=samplerate, blocksize=8000, device=device, dtype='int16',
+    with sd.RawInputStream(samplerate=samplerate, blocksize=8000, device=config.DEVICE, dtype='int16',
                            channels=1, callback=q_callback) as stream:
         rec = vosk.KaldiRecognizer(model, samplerate)
 
