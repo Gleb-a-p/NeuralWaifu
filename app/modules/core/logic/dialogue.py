@@ -102,7 +102,7 @@ def execute_cmd(cmd: str):
     elif cmd in config.VA_VOID_CMD_LIST:
         if cmd == 'current_time': # get current time
             now = datetime.datetime.now()
-            text = "Сейч+ас " + num2text(now.hour) + " " + num2text(now.minute)
+            text = "Сейчас " + num2text(now.hour) + " " + num2text(now.minute)
 
         elif cmd == 'open_browser': # open browser
             # chrome_path = 'C:\Program Files\Google\Chrome\Application\chrome.exe'
