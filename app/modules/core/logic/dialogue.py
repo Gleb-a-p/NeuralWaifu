@@ -176,7 +176,7 @@ def generate_response(dialogue_history, message, mod, client=Client()): # Пол
         # Если это новый диалог, добавляем инструкцию для стиля общения
         if not dialogue_history:
             dialogue_history.append({"role": "system",
-                "content": config.PROMT
+                "content": config.PROMPT
             })
 
         # Добавление текущего сообщения в историю
