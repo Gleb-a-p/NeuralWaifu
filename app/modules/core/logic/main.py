@@ -4,9 +4,8 @@ This is main file with import
 of all necessary libraries and functions.
 You need run this file to run project.
 """
-from configparser import ConfigParser
-from typing import Any
 
+from configparser import ConfigParser
 from openai import OpenAI
 from PyQt6.QtWidgets import QMainWindow, QApplication
 import random
@@ -74,7 +73,7 @@ def main():
     )
 
     # list for storing dialog history
-    dialogue_history: list[Any] = []
+    dialogue_history: list = []
 
     # checking the OpenAI client for correctness
     mod: str = "base"
