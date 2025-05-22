@@ -1,6 +1,6 @@
 # Импорт библиотек
 from fuzzywuzzy import fuzz
-from num2t4ru import num2text
+import num2words  # instead num2t4ru
 from g4f.client import Client
 import datetime
 import webbrowser
@@ -102,7 +102,7 @@ def execute_cmd(cmd: str):
     elif cmd in config.VA_VOID_CMD_LIST:
         if cmd == 'current_time': # get current time
             now = datetime.datetime.now()
-            text = "Сейч+ас " + num2text(now.hour) + " " + num2text(now.minute)
+            text = f"Сейч+ас {num2words.num2words(now.hour, lang=config.LANGUAGE)} {num2words.num2words(now.minute, lang=config.LANGUAGE)}"
 
         elif cmd == 'open_browser': # open browser
             # chrome_path = 'C:\Program Files\Google\Chrome\Application\chrome.exe'
@@ -157,7 +157,7 @@ def correct_response(response):
     for word in bit_response:
         for digit in digits:
             if digit in word:
-                corrected_response += str(num2text(int(word))) + " "
+                corrected_response += f"{num2words.num2words(int(word), lang=config.LANGUAGE)} "
                 flag = False
                 break
 
