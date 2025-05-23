@@ -1,16 +1,17 @@
-# Импорт библиотек
+# coding: utf-8
+
 from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
 from comtypes import CLSCTX_ALL
 
-# Импорт модулей
-from app.modules.core.logic.config import BASE_VOLUME
+import app.modules.core.logic.config as config
 
 
 def wake_up():
-    # Инициализация
     devices = AudioUtilities.GetSpeakers()
-    interface = devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
+    interface = devices.Activate(
+        IAudioEndpointVolume._iid_,
+        CLSCTX_ALL,
+        None
+    )
     volume = interface.QueryInterface(IAudioEndpointVolume)
-
-    # Корректировка громкости
-    volume.SetMasterVolumeLevelScalar(BASE_VOLUME, None)
+    volume.SetMasterVolumeLevelScalar(config.BASE_VOLUME, None)
