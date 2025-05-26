@@ -28,6 +28,9 @@ def va_respond(message: str, client, dialogue_history, mod) -> None:
         if (
                 cmd["cmd"] not in config.VA_SPEAKING_CMD_LIST.keys() or
                 cmd["percent"] < config.CMD_PERCENT_DETECTION
+        ) and (
+                cmd["cmd"] not in config.VA_VOID_CMD_LIST.keys() or
+                cmd["percent"] < config.CMD_PERCENT_DETECTION
         ):
             if mod == "base":
                 try:
