@@ -11,8 +11,7 @@ import os
 import app.modules.core.logic.config as config
 import app.modules.audio.audio_detection as a_d
 import app.modules.audio.audio_speaking as a_s
-import app.modules.core.changing_state.sleep as sleep
-import app.modules.core.changing_state.wake_up as wake_up
+from app.modules.core.state_interface import StateInterface
 
 
 # voice command reading function
@@ -85,6 +84,7 @@ def recognize_cmd(cmd: str) -> dict[str, str | int]:
 
 # voice command execution function
 def execute_cmd(cmd: str) -> None:
+    state_interface: StateInterface = StateInterface()
     text = config.NOT_UNDERSTAND_ANSWER
     if cmd in config.VA_SPEAKING_CMD_LIST:
         match cmd:
@@ -115,10 +115,10 @@ def execute_cmd(cmd: str) -> None:
                 os.system(config.GOODBYE_DPI_PATH)
                 text = random.choice(config.EXECUTE_ANSWER)
             case "sleep":
-                sleep.sleep()
+                state_interface.sleep()
                 text = random.choice(config.EXECUTE_ANSWER)
             case "wake_up":
-                wake_up.wake_up()
+                state_interface.wake_up(config.BASE_VOLUME)
                 text = random.choice(config.EXECUTE_ANSWER)
             case "turn_on_music":
                 pass
