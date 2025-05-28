@@ -2,7 +2,7 @@
 # This is main file with import of all necessary libraries and functions, you need run this file to run project.
 
 # Импорт библиотек
-from openai import  OpenAI
+from openai import OpenAI
 from PyQt6.QtWidgets import QApplication, QMainWindow
 from random import randint, choice
 import configparser
@@ -36,16 +36,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         entered_message = self.lineEdit.text()
 
         if entered_message.strip() != "": # Если сообщение не пустое
-            self.listWidget.addItem(entered_message)
+            self.listWidget.addItem(f"User: {entered_message}")
             print(f"Entered message: {entered_message}")
 
             self.lineEdit.setText("")
             time.sleep(randint(10, 30) / 1000)
 
-            if self.mod == "base":
-                self.listWidget.addItem(dialogue.generate_response(self.dialog, entered_message, self.mod, self.client))
-            elif self.mod == "free":
-                self.listWidget.addItem(dialogue.generate_response(dialogue_history=self.dialog, message=entered_message, mod=self.mod))
+            response = dialogue.va_respond("Джарвис " * (not(entered_message.startswith(config.VA_WAKE_WORD_LIST))) + entered_message, self.client, self.dialog, self.mod)
+            self.listWidget.addItem(f"Джарвис: {response}")
+            # if self.mod == "base":
+            #     self.listWidget.addItem(dialogue.generate_response(self.dialog, entered_message, self.mod, self.client))
+            # elif self.mod == "free":
+            #     self.listWidget.addItem(dialogue.generate_response(dialogue_history=self.dialog, message=entered_message, mod=self.mod))
 
             print(self.dialog)
 
@@ -62,8 +64,8 @@ def main():
 
     # Инициализация OpenAI клиента
     client = OpenAI(
-        api_key="sk-eojihWMYuwlwO4oNjNMX8DbkkkBtLg7I",
-        base_url="https://api.proxyapi.ru/openai/v1",
+        api_key=api_key,
+        base_url=config.BASE_GPT_URL # base_url="https://api.proxyapi.ru/openai/v1",
     )
 
     # Список для хранения истории диалога
@@ -71,11 +73,11 @@ def main():
 
     # Проверка клиента OpenAI на корректность
     mod = "base"
-    print(dialogue.generate_response(dialogue_history, "Кто ты?", mod, client))
-    if dialogue.generate_response(dialogue_history, "Кто ты?", mod, client) == None: # Если апи-ключ не работает, то используем свободную модель
+    # print(dialogue.generate_response(dialogue_history, "Кто ты?", mod, client))
+    if dialogue.generate_response(dialogue_history, config.CHECKING_MESSAGE, mod, client) == None: # Если апи-ключ не работает, то используем свободную модель
         mod = "free"
     else:
-        mod = dialogue.get_mod()
+        mod = dialogue.get_mod() # Если апи-ключ рабочий, то предлагаем выбор между бесплатной моделью и моделью через апи-ключ
 
     # Создание приложения
     app = QApplication(sys.argv)

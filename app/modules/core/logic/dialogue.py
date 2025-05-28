@@ -12,7 +12,7 @@ import app.modules.core.logic.config as config # Модуль конфигура
 import app.modules.audio.audio_detection as audio_detection # Модуль работы с речью(распознавание)
 import app.modules.audio.audio_speaking as audio_speaking # Модуль работы с речью(синтез)
 import app.modules.core.changing_state.sleep as sleep # Модуль засыпания
-import app.modules.core.changing_state.wake_up as wake_up# Модуль пробуждения
+import app.modules.core.changing_state.wake_up as wake_up # Модуль пробуждения
 
 
 # Функция считывания голосовой команды
@@ -32,16 +32,20 @@ def va_respond(message: str, client, dialogue_history, mod):
         if ( ( cmd['cmd'] not in config.VA_SPEAKING_CMD_LIST.keys() or cmd['percent'] < config.CMD_PERCENT_DETECTION ) and ( cmd['cmd'] not in config.VA_VOID_CMD_LIST.keys() or cmd['percent'] < config.CMD_PERCENT_DETECTION ) ): # or ( cmd == 'usual_answer' ):
             if mod == "base":
                 try:
-                    audio_speaking.va_speak(generate_response(dialogue_history, message, mod, client))
+                    response = generate_response(dialogue_history, message, mod, client)
+                    audio_speaking.va_speak(response)
                 except Exception as err:
                     print(err)
             elif mod == "free":
                 try:
-                    audio_speaking.va_speak(generate_response(dialogue_history=dialogue_history, message=message, mod=mod))
+                    response = generate_response(dialogue_history=dialogue_history, message=message, mod=mod)
+                    audio_speaking.va_speak(response)
                 except Exception as err:
                     print(err)
         else:
-            execute_cmd(cmd['cmd'])
+            response = execute_cmd(cmd['cmd'])
+
+        return response
 
 
 # Функция корректировки голосовой команды
@@ -145,6 +149,7 @@ def execute_cmd(cmd: str):
 
     print(f"Ответ от {config.VA_NAME}: {text}") # Вывод ответа ассистента в консоль
     audio_speaking.va_speak(text) # Сообщение ответа
+    return text
 
 
 # Функция корректировки ответа
@@ -174,29 +179,50 @@ def generate_response(dialogue_history, message, mod, client=Client()): # Пол
     try:
         # Если это новый диалог, добавляем инструкцию для стиля общения
         if not dialogue_history:
-            dialogue_history.append({"role": "system",
-                "content": config.PROMT
-            })
+            dialogue_history.append(
+                {
+                    "role": "user",
+                    "content": config.PROMPT
+                }
+            )
 
         # Добавление текущего сообщения в историю
-        dialogue_history.append({"role": "user", "content": message})
+        dialogue_history.append(
+            {
+                "role": "user",
+                "content": message
+            }
+        )
 
         if mod == "base": # Если апи-ключ для ChatGPT рабочий, то используем его
             # Обращение к OpenAI API
-            chat_completion = client.chat.completions.create(
-                model=config.GPT_MODEL,
-                messages=dialogue_history
-            )
-            response = chat_completion.choices[0].message.content.strip()
+            # chat_completion = client.chat.completions.create(
+            #     model=config.GPT_MODEL,
+            #     messages=dialogue_history
+            # )
 
-            dialogue_history.append({"role": "assistant", "content": response})
+            for model in config.GPT_MODEL_LIST: # Перебор возможных моделей
+                try:
+                    chat_completion = client.chat.completions.create(
+                        model = model,
+                        messages = dialogue_history
+                    )
 
-            corrected_response = correct_response(response)
-            print(corrected_response)
-            return corrected_response
+                    response = chat_completion.choices[0].message.content.strip()
+
+                    dialogue_history.append({"role": "assistant", "content": response})
+
+                    corrected_response = correct_response(response)
+                    print(corrected_response)
+
+                    return corrected_response
+
+                except Exception as err:
+                    print(err)
+                    continue
 
         elif mod == "free":  # Если апи-ключ для ChatGPT не рабочий, то используем свободную версию
-            for gpt_model in config.GPT_MODEL_LIST: # Перебор всевозможных free-моделей
+            for gpt_model in config.GPT_FREE_MODEL_LIST: # Перебор всевозможных free-моделей
                 try:
                     chat_completion = client.chat.completions.create(
                         model=gpt_model,
@@ -208,14 +234,15 @@ def generate_response(dialogue_history, message, mod, client=Client()): # Пол
 
                     corrected_response = correct_response(response)
                     print(corrected_response)
+
                     return corrected_response
 
                 except Exception as err:
                     print(err)
                     continue
 
-    except Exception as e:
-        print(f"Произошла ошибка: {str(e)}")
+    except Exception as error:
+        print(f"Произошла ошибка: {str(error)}")
         print(f"Message: {message}")
 
 
