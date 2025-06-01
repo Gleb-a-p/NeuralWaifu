@@ -17,12 +17,13 @@ import app.modules.core.changing_state.wake_up as wake_up # Модуль про�
 
 # Функция считывания голосовой команды
 def va_respond(message: str, client, dialogue_history, mod):
-    print(message)
-    detected_message = audio_detection.va_wake_word_detection(message) # Распознаем сообщение
+    detected_message = (audio_detection.va_wake_word_detection(message))
+    print(f"Detected message = {detected_message}")
+    if detected_message:
+        detected_message.strip('?') # Распознаем сообщение
 
     if detected_message: # message.startswith(config.VA_WAKE_WORD_LIST):
-        if message:
-            print(message)
+        print(message)
 
         # Обращаются к ассистенту
         print(f"К ассистенту обращаются с запросом [{detected_message}]")
@@ -41,7 +42,10 @@ def va_respond(message: str, client, dialogue_history, mod):
                     response = generate_response(dialogue_history=dialogue_history, message=message, mod=mod)
                     audio_speaking.va_speak(response)
                 except Exception as err:
-                    print(err)
+                    print(
+                        f"Ошибка при получении ответа: {err}",
+                        "Полный ответ смотрите в логах(dialogue_history)"
+                    )
         else:
             response = execute_cmd(cmd['cmd'])
 
@@ -102,6 +106,9 @@ def execute_cmd(cmd: str):
 
         elif cmd == 'censure': # reaction for censure
             text = random.choice(config.CENSURE_ANSWER)
+
+        elif cmd == 'call':
+            text = random.choice(config.CALL_ANSWER)
 
     elif cmd in config.VA_VOID_CMD_LIST:
         if cmd == 'current_time': # get current time

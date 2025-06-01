@@ -42,8 +42,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.lineEdit.setText("")
             time.sleep(randint(10, 30) / 1000)
 
-            response = dialogue.va_respond("Джарвис " * (not(entered_message.startswith(config.VA_WAKE_WORD_LIST))) + entered_message, self.client, self.dialog, self.mod)
+            response = dialogue.va_respond("Джарвис " * (not(entered_message.startswith(config.VA_NAME))) + entered_message, self.client, self.dialog, self.mod)
             self.listWidget.addItem(f"Джарвис: {response}")
+
             # if self.mod == "base":
             #     self.listWidget.addItem(dialogue.generate_response(self.dialog, entered_message, self.mod, self.client))
             # elif self.mod == "free":
