@@ -1,4 +1,4 @@
-# NeuralWaifu (Temporarily - Jarvis) v1.0.4 (very early)
+# NeuralWaifu (Temporarily - Jarvis) v1.1.1 (very early)
 Voice Assistant created using Python and neural networks.
 The main project challenges we try to achieve is:
  - 100% offline (no cloud)

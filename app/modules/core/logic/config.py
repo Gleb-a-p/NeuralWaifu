@@ -4,14 +4,15 @@
 # Voice assistant
 VA_NAME: str = "Джарвис"
 
-VA_VERSION: str = "1.1.0"
+VA_VERSION: str = "1.1.1"
 
 VA_WAKE_WORD_LIST: list[str] = [
     "джарвис",
     "джарви",
     "джар",
     "джордж",
-    "джярвис"
+    "джярвис",
+    "жарвис"
 ]
 
 # Command recognition word lists
@@ -160,7 +161,7 @@ PROMPT: str = (
     # Общайся с мудростью и спокойствием, как древний наставник.
 )
 
-GPT_MODEL_LIST = [
+GPT_MODEL_LIST: list[str] = [
     "openai/gpt-4.1-mini",
     "deepseek/deepseek-r1-0528:free",
     "google/gemma-3n-e4b-it:free",
@@ -182,7 +183,7 @@ OPTIONS_MESSAGE: str = (
     "Please, select one of suggested options(b, f): "
 )
 
-CHECKING_MESSAGE = "Кто ты?"
+CHECKING_MESSAGE: str = "Кто ты?"
 
 # Responses to commands
 GREETING_LIST: list[str] = [
@@ -264,14 +265,14 @@ POWEROFF_MESSAGE_LIST: list[str] = [
 The percentage of probability with which a command
 for an assistant is considered recognized.
 """
-CMD_PERCENT_DETECTION = 55
+CMD_PERCENT_DETECTION: int = 55
 """
 The percentage of probability with which
 the assistant's name is considered recognized.
 """
-NAME_PERCENT_DETECTION = 70
-BASE_VOLUME = 0.66
-DEVICE = 1  # recorder ID
+NAME_PERCENT_DETECTION: int = 70
+BASE_VOLUME: float = 0.66
+DEVICE: int = 1  # recorder ID
 """
 Supported values for 'LANGUAGE' are:
     en (English, default)

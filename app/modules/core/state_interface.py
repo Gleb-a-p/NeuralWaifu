@@ -11,15 +11,18 @@ class StateInterface:
     def __init__(self) -> None:
         logger.debug("Initializing StateInterface...")
         devices = AudioUtilities.GetSpeakers()
+
         if not devices:
             logger.error("Audio device not found.")
             raise RuntimeError("Audio device not found.")
 
         interface = devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
         self._volume = interface.QueryInterface(IAudioEndpointVolume)
+
         if self._volume is None:
             logger.error("Failed to obtain volume control interface.")
             raise RuntimeError("Failed to obtain volume control interface.")
+
         logger.info("StateInterface initialized successfully.")
 
     def sleep(self) -> None:
@@ -32,5 +35,6 @@ class StateInterface:
         if not 0.0 <= audio_volume <= 1.0:
             logger.warning(f"Ignoring invalid volume level: {audio_volume}.")
             return
+
         logger.info(f"Sets the master volume level to: {audio_volume}.")
         self._volume.SetMasterVolumeLevelScalar(audio_volume, None)
