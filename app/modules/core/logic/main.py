@@ -1,26 +1,26 @@
 # -*-coding: utf-8 -*-
-# This is main file with import of all necessary libraries and functions, you need run this file to run project.
+"""
+This is main file with import
+of all necessary libraries and functions.
+You need run this file to run project.
+"""
 
-# Импорт библиотек
 from openai import OpenAI
-from PyQt6.QtWidgets import QApplication, QMainWindow
-from random import randint, choice
+from PyQt6.QtWidgets import QMainWindow, QApplication
+import random
 import configparser
 import webbrowser
 import time
-# import os
 import sys
 
-# Импорт модулей
-import app.modules.core.logic.config as config # Модуль конфигурации
-from app.modules.graphics.gui import Ui_MainWindow # Модуль графического интерфейса
-import app.modules.core.logic.dialogue as dialogue # Модуль диалоговой логики(ChatGPT)
-import app.modules.audio.audio_detection as audio_detection # Модуль работы с речью(распознавание)
-import app.modules.audio.audio_speaking as audio_speaking # Модуль работы с речью(синтез)
+import app.modules.core.logic.config as config # Configuration
+import app.modules.graphics.gui as gui # Graphical interface
+import app.modules.core.logic.dialogue as dialogue # Dialogue logic(Chat GPT)
+import app.modules.audio.audio_detection as audio_detection # Audio(recognition)
+import app.modules.audio.audio_speaking as audio_speaking # Audio(synthesis)
 
 
-# Класс MainWindow для настройки главного окна приложения
-class MainWindow(QMainWindow, Ui_MainWindow):
+class MainWindow(QMainWindow, gui.Ui_MainWindow):
     def __init__(self, client, dialog, mod):
         super().__init__()
         self.setupUi(self)
@@ -35,14 +35,20 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         print("Clicked!")
         entered_message = self.lineEdit.text()
 
-        if entered_message.strip() != "": # Если сообщение не пустое
+        # If message is not empty
+        if entered_message.strip() != '':
             self.listWidget.addItem(f"User: {entered_message}")
             print(f"Entered message: {entered_message}")
 
             self.lineEdit.setText("")
-            time.sleep(randint(10, 30) / 1000)
+            time.sleep(random.randint(10, 30) / 1000)
 
-            response = dialogue.va_respond("Джарвис " * (not(entered_message.startswith(config.VA_NAME))) + entered_message, self.client, self.dialog, self.mod)
+            response = dialogue.va_respond(
+                f"{config.VA_NAME} " * (not(entered_message.startswith(config.VA_NAME))) + entered_message,
+                self.client,
+                self.dialog,
+                self.mod
+            )
             self.listWidget.addItem(f"Джарвис: {response}")
 
             # if self.mod == "base":
@@ -53,59 +59,76 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             print(self.dialog)
 
 
-# Main
 def main():
-    # Записываем время запуска программы
-    start = time.time()
+    start: float = time.time() # recording the program launch time
 
-    # Читаеем данные из файла конфигурации
-    conf = configparser.ConfigParser()
-    conf.read('../../../etc/config.ini')
-    api_key = conf['DEFAULT']['Api_key']
+    # Reading data from the configuration file
+    conf: configparser.ConfigParser = configparser.ConfigParser()
+    conf.read("../../../etc/config.ini")
+    api_key: str = conf['DEFAULT']['Api_key']
 
-    # Инициализация OpenAI клиента
-    client = OpenAI(
+    # Initializing an OpenAI client
+    client: OpenAI = OpenAI(
         api_key=api_key,
         base_url=config.BASE_GPT_URL # base_url="https://api.proxyapi.ru/openai/v1",
     )
 
-    # Список для хранения истории диалога
-    dialogue_history = []
+    dialogue_history: list = [] # list for storing dialog history
 
-    # Проверка клиента OpenAI на корректность
-    mod = "base"
-    # print(dialogue.generate_response(dialogue_history, "Кто ты?", mod, client))
-    if dialogue.generate_response(dialogue_history, config.CHECKING_MESSAGE, mod, client) == None: # Если апи-ключ не работает, то используем свободную модель
+    # Checking the OpenAI client for correctness
+    mod: str = "base"
+    if dialogue.generate_response(
+            dialogue_history,
+            config.CHECKING_MESSAGE,
+            mod,
+            client
+    ) == '': # If api key does not work, use free model
         mod = "free"
     else:
-        mod = dialogue.get_mod() # Если апи-ключ рабочий, то предлагаем выбор между бесплатной моделью и моделью через апи-ключ
+        mod = dialogue.get_mod()
 
-    # Создание приложения
-    app = QApplication(sys.argv)
+    # Creating an application
+    app: QApplication = QApplication(sys.argv)
 
-    # Создание MainWindow
-    window = MainWindow(client=client, dialog=dialogue_history, mod=mod)
+    # Creating MainWindow
+    window: MainWindow = MainWindow(
+        client=client,
+        dialog=dialogue_history,
+        mod=mod
+    )
     window.show()
 
-    # Фиксируем путь к браузеру
-    webbrowser.register(config.BASE_BROWSER, None, webbrowser.BackgroundBrowser(config.CHROME_PATH))
+    # Fix the browser path
+    webbrowser.register(
+        config.BASE_BROWSER,
+        None,
+        webbrowser.BackgroundBrowser(config.CHROME_PATH)
+    )
 
-    # Фиксирование окончания запуска бота
-    end = time.time()
+    end: float = time.time() # recording the end time of the program launch
 
-    # Вывод отладочной информации
-    print(f"{config.VA_NAME} (v{config.VA_VERSION}) начал свою работу ...")
-    print(f"Api key: {api_key}")
-    print(f"OpenAI client: {client}")
-    print(f"Mod = {mod}")
-    print(f"Время на запуск: {round(end - start, 2)} секунд")
+    # Output debugging information
+    print(
+        f"{config.VA_NAME} (v{config.VA_VERSION}) начал свою работу ...\n"
+        f"Api key: {api_key}\n"
+        f"OpenAI client: {client}\n"
+        f"Mod = {mod}\n"
+        f"Время на запуск: {(end - start):.2f} секунд"
+    )
 
-    # Запускаем цикл событий.
+    # Starting the event loop
     app.exec()
 
-    # Запуск голосового ассистента
-    audio_speaking.va_speak(choice(config.GREETING_LIST)) # Приветствие при запуске
-    audio_detection.va_listen(dialogue.va_respond, client, dialogue_history, mod) # Начать прослушивание команд
+    # Starting the voice assistant
+    audio_speaking.va_speak(
+        random.choice(config.GREETING_LIST)
+    )  # greeting at startup
+    audio_detection.va_listen(
+        dialogue.va_respond,
+        client,
+        dialogue_history,
+        mod
+    )  # start listening to commands
 
 
 if __name__ == "__main__":
