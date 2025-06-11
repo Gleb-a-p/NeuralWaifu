@@ -4,7 +4,7 @@
 # Voice assistant
 VA_NAME: str = "Джарвис"
 
-VA_VERSION: str = "1.1.1"
+VA_VERSION: str = "1.1.2"
 
 VA_WAKE_WORD_LIST: list[str] = [
     "джарвис",
@@ -101,7 +101,12 @@ VA_VOID_CMD_LIST: dict[str: list[str]] = {
         "включи звук",
         "пробуждение",
         "проснись",
-        "верни звук"
+        "верни звук",
+        "стандартная громкость"
+    ],
+    "max_volume": [
+        "громкость на максимум",
+        "максимальная громкость",
     ],
     "turn_on_music": [
         "музыка",
@@ -113,7 +118,29 @@ VA_VOID_CMD_LIST: dict[str: list[str]] = {
         "вруби музон",
         "врубай музыку",
         "вруби музыку",
-        "включи музон"
+        "включи музон",
+        "включи музыку",
+        "включай музыку"
+    ],
+    "stop_music": [
+        "останови музыку",
+        "прерви музыку",
+        "приостанови музыку",
+        "останови музон",
+        "останови музяку",
+        "прерви музяку",
+        "прерви музон",
+        "приостанови музяку"
+    ],
+    "play_music": [
+        "возобнови музыку",
+        "возобнови музяку",
+        "возобнови музон",
+        "возобнови музло",
+    ],
+    "change_music": [
+        "смени музыку",
+        "измени музыку"
     ],
     "turn_off_music": [
         "тишина",
@@ -123,6 +150,12 @@ VA_VOID_CMD_LIST: dict[str: list[str]] = {
         "выключай музыку",
         "выключи музон"
     ],
+    "take_screenshot": [
+        "сделай скриншот",
+        "сделай снимок экрана",
+        "скриншот",
+        "снимок экрана"
+    ],
     "poweroff": [
         "выключайся",
         "завершение работы",
@@ -131,8 +164,10 @@ VA_VOID_CMD_LIST: dict[str: list[str]] = {
 }
 
 # Links and file paths
+RELATIVE_VA_PATH: str = "app\modules\core\logic\main.py"
 GOODBYE_DPI_PATH: str = "C:/Users/gleba/Desktop/goodbyedpi-0.2.3rc1-2/goodbyedpi-0.2.3rc1/1_russia_blacklist"
 CHROME_PATH: str = "C:/Program Files/Google/Chrome/Application/chrome.exe"
+GALLERY_PATH: str = "C:/Users/gleba/Desktop/Screenshots"
 BASE_BROWSER: str = "google-chrome"
 BASE_URL: str = "http://python.org"
 BASE_GPT_URL: str = "https://openrouter.ai/api/v1"
@@ -231,8 +266,9 @@ EXECUTE_ANSWER: list[str] = [
     "будет исполнено",
     "есть, сэр",
     "понял, принял,"
-    " выполняю",
-    "загружаю, сэр"
+    "выполняю",
+    "загружаю, сэр",
+    "запрос выполнен, сэр"
 ]
 
 PRAISE_ANSWER: list[str] = [
@@ -242,7 +278,6 @@ PRAISE_ANSWER: list[str] = [
     "всегда к вашим услугам, сэр"
 ]
 
-# Responses to praise
 CENSURE_ANSWER: list[str] = [
     "очень тонкое замечание, сэр",
     "как остроумно, сэр",
@@ -254,7 +289,8 @@ CALL_ANSWER: list[str] = [
     "слушаю, сэр"
 ]
 
-# Responses to rudeness
+TAKE_SCREENSHOT_ANSWER: str = "Снимок экрана сохранён"
+
 POWEROFF_MESSAGE_LIST: list[str] = [
     "досвидания, сэр",
     "выключаюсь"
@@ -265,7 +301,7 @@ POWEROFF_MESSAGE_LIST: list[str] = [
 The percentage of probability with which a command
 for an assistant is considered recognized.
 """
-CMD_PERCENT_DETECTION: int = 55
+CMD_PERCENT_DETECTION: int = 50 # 55
 """
 The percentage of probability with which
 the assistant's name is considered recognized.
@@ -333,3 +369,5 @@ Supported values for 'LANGUAGE' are:
     vi (Vietnamese)
 """
 LANGUAGE: str = "ru"
+SCREENSHOT_NAME = "Screenshot"
+SCREENSHOT_EXTENSION: str = ".png"

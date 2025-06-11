@@ -1,4 +1,5 @@
 # coding: ascii
+# This is a setting state for VA file
 
 from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
 from comtypes import CLSCTX_ALL

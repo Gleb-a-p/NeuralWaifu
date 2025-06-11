@@ -22,7 +22,7 @@ def q_callback(indata, frames, time, status):
     q.put(bytes(indata))
 
 
-# microphone listening function
+# Microphone listening function
 def va_listen(callback, client, dialog, mod):
     with sd.RawInputStream(
             samplerate=samplerate,
@@ -33,22 +33,29 @@ def va_listen(callback, client, dialog, mod):
             callback=q_callback
     ) as stream:
         rec = vosk.KaldiRecognizer(model, samplerate)
+        music = ''
+
         while True:
             data = q.get()
+
             if rec.AcceptWaveform(data):
-                # suspend the microphone listening while the assistant is responding
+                # Suspend the microphone listening while the assistant is responding
                 stream.stop()
-                callback(
+
+                res = callback(
                     json.loads(rec.Result())["text"],
                     client,
                     dialog,
-                    mod
+                    mod,
+                    music
                 )
+                resp, music = res[0], res[1]
+
                 # Resume listening to the microphone
                 stream.start()
 
 
-# function for recognizing the assistant's name in a speech segment
+# Function for recognizing the assistant's name in a speech segment
 def va_wake_word_recognition(word: str) -> bool:
     for name in config.VA_WAKE_WORD_LIST:
         detection_probability = fuzz.ratio(name, word)
@@ -58,7 +65,7 @@ def va_wake_word_recognition(word: str) -> bool:
     return False
 
 
-# function for trimming speech to a meaningful segment
+# Function for trimming speech to a meaningful segment
 def va_wake_word_detection(message: str) -> str:
     separated_message: list[str] = message.split()
     for i in range(len(separated_message)):

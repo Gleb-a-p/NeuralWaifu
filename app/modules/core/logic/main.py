@@ -7,6 +7,7 @@ You need run this file to run project.
 
 from openai import OpenAI
 from PyQt6.QtWidgets import QMainWindow, QApplication
+from pygame import mixer
 import random
 import configparser
 import webbrowser
@@ -27,6 +28,7 @@ class MainWindow(QMainWindow, gui.Ui_MainWindow):
         self.client = client
         self.dialog = dialog
         self.mod = mod
+        self.music = ''
 
         self.pushButton.clicked.connect(self.button_clicked)
         self.pushButton.setCheckable(True)
@@ -43,11 +45,12 @@ class MainWindow(QMainWindow, gui.Ui_MainWindow):
             self.lineEdit.setText("")
             time.sleep(random.randint(10, 30) / 1000)
 
-            response = dialogue.va_respond(
+            response, self.music = dialogue.va_respond(
                 f"{config.VA_NAME} " * (not(entered_message.startswith(config.VA_NAME))) + entered_message,
                 self.client,
                 self.dialog,
-                self.mod
+                self.mod,
+                self.music
             )
             self.listWidget.addItem(f"Джарвис: {response}")
 
@@ -104,6 +107,8 @@ def main():
         None,
         webbrowser.BackgroundBrowser(config.CHROME_PATH)
     )
+
+    mixer.init() # Initializing music mixer
 
     end: float = time.time() # recording the end time of the program launch
 

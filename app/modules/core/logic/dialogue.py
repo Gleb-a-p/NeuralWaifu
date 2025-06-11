@@ -2,24 +2,24 @@
 
 from fuzzywuzzy import fuzz
 from g4f.client import Client
+from pygame import mixer
 import num2words
-import datetime
-import webbrowser
 import random
-import os
 
 import app.modules.core.logic.config as config # Configuration
 import app.modules.audio.audio_detection as audio_detection # Audio(detection)
 import app.modules.audio.audio_speaking as audio_speaking # Audio(synthesis)
 from app.modules.core.state_interface import StateInterface # Changing VA state
+from app.modules.windows.system_actions import SystemExecutor # Executing system commands
 
 
 # Voice command reading function
-def va_respond(message: str, client, dialogue_history, mod) -> str:
+def va_respond(message, client, dialogue_history, mod, music) -> tuple[str, str]:
     detected_message = (audio_detection.va_wake_word_detection(message))
     print(f"Detected message = {detected_message}")
 
     if detected_message:
+        detected_message.strip()
         detected_message.strip('?')
 
     if detected_message: # message.startswith(config.VA_WAKE_WORD_LIST):
@@ -33,10 +33,10 @@ def va_respond(message: str, client, dialogue_history, mod) -> str:
 
         if (
                 cmd["cmd"] not in config.VA_SPEAKING_CMD_LIST.keys() or
-                cmd["percent"] < config.CMD_PERCENT_DETECTION
+                cmd["percent"] <= config.CMD_PERCENT_DETECTION
         ) and (
                 cmd["cmd"] not in config.VA_VOID_CMD_LIST.keys() or
-                cmd["percent"] < config.CMD_PERCENT_DETECTION
+                cmd["percent"] <= config.CMD_PERCENT_DETECTION
         ):
             match mod:
                 case "base":
@@ -69,9 +69,15 @@ def va_respond(message: str, client, dialogue_history, mod) -> str:
                             "Полный ответ смотрите в логах(dialogue_history)"
                         )
         else:
-            response = execute_cmd(cmd['cmd'])
+            result = execute_cmd(
+                cmd['cmd'],
+                music
+            )
+            response, music = result[0], result[1]
 
-        return response
+        return response, music
+
+    return '', music
 
 
 # Voice command correction function
@@ -108,8 +114,18 @@ def recognize_cmd(cmd: str) -> dict[str, str | int]:
 
 
 # Voice command execution function
-def execute_cmd(cmd: str) -> str:
+def execute_cmd(cmd, music) -> tuple[str, str]:
     state_interface: StateInterface = StateInterface()
+    system_executor: SystemExecutor = SystemExecutor(
+        config.GOODBYE_DPI_PATH,
+        config.BASE_BROWSER,
+        config.YOUTUBE_URL,
+        config.GALLERY_PATH,
+        config.LANGUAGE,
+        config.SCREENSHOT_NAME,
+        config.SCREENSHOT_EXTENSION
+    )
+
     text = config.NOT_UNDERSTAND_ANSWER
 
     if cmd in config.VA_SPEAKING_CMD_LIST:
@@ -132,20 +148,18 @@ def execute_cmd(cmd: str) -> str:
     elif cmd in config.VA_VOID_CMD_LIST:
         match cmd:
             case "current_time":
-                now = datetime.datetime.now()
-                text = (f"Сейчас {num2words.num2words(now.hour, lang=config.LANGUAGE)} "
-                        f"{num2words.num2words(now.minute, lang=config.LANGUAGE)}")
+                text = system_executor.get_current_time()
 
             case "open_browser":
-                webbrowser.get(config.BASE_BROWSER).open_new_tab(config.BASE_URL)
+                system_executor.open_browser(config.BASE_URL)
                 text = random.choice(config.EXECUTE_ANSWER)
 
             case "open_youtube":
-                webbrowser.get(config.BASE_BROWSER).open_new_tab(config.YOUTUBE_URL)
+                system_executor.open_youtube()
                 text = random.choice(config.EXECUTE_ANSWER)
 
             case "run_goodbye_dpi":
-                os.system(config.GOODBYE_DPI_PATH)
+                system_executor.run_goodbye_dpi()
                 text = random.choice(config.EXECUTE_ANSWER)
 
             case "sleep":
@@ -156,19 +170,54 @@ def execute_cmd(cmd: str) -> str:
                 state_interface.wake_up(config.BASE_VOLUME)
                 text = random.choice(config.EXECUTE_ANSWER)
 
+            case "max_volume":
+                state_interface.wake_up(1)
+                text = random.choice(config.EXECUTE_ANSWER)
+
             case "turn_on_music":
-                pass
+                text = random.choice(config.EXECUTE_ANSWER)
+                audio_speaking.va_speak(text)
+                music = audio_speaking.turn_on_music()
+                print(f"Ответ от {config.VA_NAME}: {text}")
+                return text, music
+
+            case "stop_music":
+                mixer.music.pause()
+                text = random.choice(config.EXECUTE_ANSWER)
+
+            case "play_music":
+                text = random.choice(config.EXECUTE_ANSWER)
+                audio_speaking.va_speak(text)
+                mixer.music.unpause()
+                print(f"Ответ от {config.VA_NAME}: {text}")
+                return text, music
+
+            case "change_music":
+                mixer.music.pause()
+                text = random.choice(config.EXECUTE_ANSWER)
+                audio_speaking.va_speak(text)
+                music = audio_speaking.change_music(music)
+                print(f"Ответ от {config.VA_NAME}: {text}")
+                return text, music
 
             case "turn_off_music":
-                pass
+                mixer.music.stop()
+                text = random.choice(config.EXECUTE_ANSWER)
+
+            case "take_screenshot":
+                system_executor.take_screenshot()
+                text = random.choice(config.EXECUTE_ANSWER) + " . " + config.TAKE_SCREENSHOT_ANSWER
 
             case "poweroff":
-                audio_speaking.va_speak(random.choice(config.POWEROFF_MESSAGE_LIST))
+                text = random.choice(config.POWEROFF_MESSAGE_LIST)
+                audio_speaking.va_speak(text)
+                print(f"Ответ от {config.VA_NAME}: {text}")
                 exit()
 
     print(f"Ответ от {config.VA_NAME}: {text}")
     audio_speaking.va_speak(text)
-    return text
+
+    return text, music
 
 
 # Response correction function
