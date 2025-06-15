@@ -4,7 +4,7 @@
 # Voice assistant
 VA_NAME: str = "Джарвис"
 
-VA_VERSION: str = "1.1.2"
+VA_VERSION: str = "1.1.3"
 
 VA_WAKE_WORD_LIST: list[str] = [
     "джарвис",
@@ -28,7 +28,8 @@ VA_SPEAKING_CMD_LIST: dict[str: list[str]] = {
         "что ты умеешь",
         "твои навыки",
         "навыки",
-        "умения"
+        "умения",
+        "расскажи о себе"
     ],
     "joke": [
         "расскажи анекдот",
@@ -46,10 +47,12 @@ VA_SPEAKING_CMD_LIST: dict[str: list[str]] = {
         "красава",
         "ты красавчик",
         "красавчик",
-        "ты лучший"
+        "ты лучший",
+        "спасибо"
     ],
     "censure": [
         "ты дурак",
+        "ты бесполезный",
         "ты баран",
         "ты идиот"
     ],
@@ -82,6 +85,18 @@ VA_VOID_CMD_LIST: dict[str: list[str]] = {
         "ютуб",
         "запусти ютуб"
     ],
+    "run_terraria": [
+        "запусти террарию",
+        "запусти терку",
+        "запусти террария",
+        "запусти терру"
+    ],
+    "run_tmodloader": [
+        "запусти модовую террарию",
+        "запусти террарию с модами",
+        "запусти т мод лоадер",
+        "запусти мод лоадер"
+    ],
     "run_goodbye_dpi": [
         "запусти гудбай д п ай",
         "запусти гудбай",
@@ -107,6 +122,18 @@ VA_VOID_CMD_LIST: dict[str: list[str]] = {
     "max_volume": [
         "громкость на максимум",
         "максимальная громкость",
+    ],
+    "volume_up": [
+        "чуть выше громкость",
+        "громкость чуть выше",
+        "сделай громкость побольше",
+        "сделай громкость повыше"
+    ],
+    "volume_down": [
+        "чуть ниже громкость",
+        "громкость чуть ниже",
+        "сделай громкость поменьше",
+        "сделай громкость пониже"
     ],
     "turn_on_music": [
         "музыка",
@@ -156,6 +183,14 @@ VA_VOID_CMD_LIST: dict[str: list[str]] = {
         "скриншот",
         "снимок экрана"
     ],
+    "get_geolocation": [
+        "отследи устройство",
+        "определи геолокацию",
+        "определи текущее местоположение",
+        "определи местоположение",
+        "определи текущее местоположение устройства",
+        "определи местоположение устройства"
+    ],
     "poweroff": [
         "выключайся",
         "завершение работы",
@@ -164,14 +199,16 @@ VA_VOID_CMD_LIST: dict[str: list[str]] = {
 }
 
 # Links and file paths
+TERRARIA_PATH: str = 'C:/GOG Games/Terraria/Terraria.exe'
+TMODLOADER_PATH: str = '"C:/GOG Games/tModLoader/start-tModLoader.bat"'
 RELATIVE_VA_PATH: str = "app\modules\core\logic\main.py"
 GOODBYE_DPI_PATH: str = "C:/Users/gleba/Desktop/goodbyedpi-0.2.3rc1-2/goodbyedpi-0.2.3rc1/1_russia_blacklist"
 CHROME_PATH: str = "C:/Program Files/Google/Chrome/Application/chrome.exe"
 GALLERY_PATH: str = "C:/Users/gleba/Desktop/Screenshots"
 BASE_BROWSER: str = "google-chrome"
 BASE_URL: str = "http://python.org"
-BASE_GPT_URL: str = "https://openrouter.ai/api/v1"
 YOUTUBE_URL: str = "https://www.youtube.com"
+BASE_GPT_URL: str = "https://openrouter.ai/api/v1"
 
 # Prompts and models
 PROMPT: str = (
@@ -234,6 +271,9 @@ GREETING_MESSAGE: str = (
     " - сообщать время,\n"
     " - отвечать на ваши вопросы,\n"
     " - рассказывать анекдоты,\n"
+    " - запускать игры и скрипты, \n"
+    " - запускать музыку, \n"
+    " - делать скриншоты, \n"
     " - и открывать браузер.\n"
     "Буду всегда рад помочь!"
 )
@@ -254,7 +294,7 @@ JOKER_LIST: list[str] = [
     "Искуственный интелект никогда не ошибается, "
     "он экспериментирует.",
     "Почему ИИ всегда выглядит уверенно? "
-    "Он знает, что у него есть 'дата' на все случаи жизни!",
+    "Он знает, что у него есть 'дата' на каждый день!",
     "Почему программисты любят искусственный интеллект? "
     "Потому что он всегда учится на своих ошибках, "
     "а не просто забивает на них.",
@@ -265,8 +305,7 @@ JOKER_LIST: list[str] = [
 EXECUTE_ANSWER: list[str] = [
     "будет исполнено",
     "есть, сэр",
-    "понял, принял,"
-    "выполняю",
+    "понял, принял, выполняю",
     "загружаю, сэр",
     "запрос выполнен, сэр"
 ]
@@ -274,7 +313,6 @@ EXECUTE_ANSWER: list[str] = [
 PRAISE_ANSWER: list[str] = [
     "спасибо, сэр",
     "рад вам служить, сэр",
-    "не льстите, сэр",
     "всегда к вашим услугам, сэр"
 ]
 
@@ -308,6 +346,8 @@ the assistant's name is considered recognized.
 """
 NAME_PERCENT_DETECTION: int = 70
 BASE_VOLUME: float = 0.66
+BASE_VOLUME_UP: float = 0.05
+BASE_VOLUME_DOWN: float = 0.05
 DEVICE: int = 1  # recorder ID
 """
 Supported values for 'LANGUAGE' are:
@@ -369,5 +409,5 @@ Supported values for 'LANGUAGE' are:
     vi (Vietnamese)
 """
 LANGUAGE: str = "ru"
-SCREENSHOT_NAME = "Screenshot"
+SCREENSHOT_NAME: str = "Screenshot"
 SCREENSHOT_EXTENSION: str = ".png"

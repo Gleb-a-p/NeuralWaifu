@@ -1,5 +1,7 @@
 # coding: ascii
-# This is a setting state for VA file
+"""
+This is a file, sets state for VA
+"""
 
 from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
 from comtypes import CLSCTX_ALL
@@ -33,9 +35,33 @@ class StateInterface:
 
     def wake_up(self, audio_volume: float) -> None:
         """Restores the master volume level."""
-        if not 0.0 <= audio_volume <= 1.0:
+        if not (0.0 <= audio_volume <= 1.0):
             logger.warning(f"Ignoring invalid volume level: {audio_volume}.")
             return
 
-        logger.info(f"Sets the master volume level to: {audio_volume}.")
         self._volume.SetMasterVolumeLevelScalar(audio_volume, None)
+        logger.info(f"Sets the master volume level to: {audio_volume}.")
+
+    def volume_up(self, up_value):
+        """Increase the master volume level."""
+        current_volume = self._volume.GetMasterVolumeLevelScalar()
+        new_volume = current_volume + up_value
+
+        if not (0.0 <= new_volume <= 1.0):
+            logger.warning(f"Ignoring invalid volume level: {current_volume + up_value}.")
+            return
+
+        self._volume.SetMasterVolumeLevelScalar(new_volume, None)
+        logger.info(f"Sets the master volume level to: {new_volume}.")
+
+    def volume_down(self, down_value):
+        """Decrease the master volume level."""
+        current_volume = self._volume.GetMasterVolumeLevelScalar()
+        new_volume = current_volume - down_value
+
+        if not (0.0 <= new_volume):
+            logger.warning(f"Ignoring invalid volume level: {current_volume + down_value}.")
+            return
+
+        self._volume.SetMasterVolumeLevelScalar(new_volume, None)
+        logger.info(f"Sets the master volume level to: {new_volume}.")

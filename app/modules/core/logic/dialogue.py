@@ -117,9 +117,7 @@ def recognize_cmd(cmd: str) -> dict[str, str | int]:
 def execute_cmd(cmd, music) -> tuple[str, str]:
     state_interface: StateInterface = StateInterface()
     system_executor: SystemExecutor = SystemExecutor(
-        config.GOODBYE_DPI_PATH,
         config.BASE_BROWSER,
-        config.YOUTUBE_URL,
         config.GALLERY_PATH,
         config.LANGUAGE,
         config.SCREENSHOT_NAME,
@@ -148,45 +146,61 @@ def execute_cmd(cmd, music) -> tuple[str, str]:
     elif cmd in config.VA_VOID_CMD_LIST:
         match cmd:
             case "current_time":
-                text = system_executor.get_current_time()
+                text: str = system_executor.get_current_time()
 
             case "open_browser":
                 system_executor.open_browser(config.BASE_URL)
-                text = random.choice(config.EXECUTE_ANSWER)
+                text: str = random.choice(config.EXECUTE_ANSWER)
 
             case "open_youtube":
-                system_executor.open_youtube()
-                text = random.choice(config.EXECUTE_ANSWER)
+                system_executor.open_browser(config.YOUTUBE_URL)
+                text: str = random.choice(config.EXECUTE_ANSWER)
+
+            case "run_terraria":
+                system_executor.run_script(config.TERRARIA_PATH)
+                text: str = random.choice(config.EXECUTE_ANSWER)
+
+            case "run_tmodloader":
+                system_executor.run_script(config.TMODLOADER_PATH)
+                text: str = random.choice(config.EXECUTE_ANSWER)
 
             case "run_goodbye_dpi":
-                system_executor.run_goodbye_dpi()
-                text = random.choice(config.EXECUTE_ANSWER)
+                system_executor.run_script(config.GOODBYE_DPI_PATH)
+                text: str = random.choice(config.EXECUTE_ANSWER)
 
             case "sleep":
                 state_interface.sleep()
-                text = random.choice(config.EXECUTE_ANSWER)
+                text: str = random.choice(config.EXECUTE_ANSWER)
 
             case "wake_up":
                 state_interface.wake_up(config.BASE_VOLUME)
-                text = random.choice(config.EXECUTE_ANSWER)
+                text: str = random.choice(config.EXECUTE_ANSWER)
 
             case "max_volume":
-                state_interface.wake_up(1)
-                text = random.choice(config.EXECUTE_ANSWER)
+                state_interface.wake_up(1.0)
+                text: str = random.choice(config.EXECUTE_ANSWER)
+
+            case "volume_up":
+                state_interface.volume_up(config.BASE_VOLUME_UP)
+                text: str = random.choice(config.EXECUTE_ANSWER)
+
+            case "volume_down":
+                state_interface.volume_down(config.BASE_VOLUME_DOWN)
+                text: str = random.choice(config.EXECUTE_ANSWER)
 
             case "turn_on_music":
-                text = random.choice(config.EXECUTE_ANSWER)
+                text: str = random.choice(config.EXECUTE_ANSWER)
                 audio_speaking.va_speak(text)
-                music = audio_speaking.turn_on_music()
+                music: str = audio_speaking.turn_on_music()
                 print(f"Ответ от {config.VA_NAME}: {text}")
                 return text, music
 
             case "stop_music":
                 mixer.music.pause()
-                text = random.choice(config.EXECUTE_ANSWER)
+                text: str = random.choice(config.EXECUTE_ANSWER)
 
             case "play_music":
-                text = random.choice(config.EXECUTE_ANSWER)
+                text: str = random.choice(config.EXECUTE_ANSWER)
                 audio_speaking.va_speak(text)
                 mixer.music.unpause()
                 print(f"Ответ от {config.VA_NAME}: {text}")
@@ -194,22 +208,28 @@ def execute_cmd(cmd, music) -> tuple[str, str]:
 
             case "change_music":
                 mixer.music.pause()
-                text = random.choice(config.EXECUTE_ANSWER)
+                text: str = random.choice(config.EXECUTE_ANSWER)
                 audio_speaking.va_speak(text)
-                music = audio_speaking.change_music(music)
+                music: str = audio_speaking.change_music(music)
                 print(f"Ответ от {config.VA_NAME}: {text}")
                 return text, music
 
             case "turn_off_music":
                 mixer.music.stop()
-                text = random.choice(config.EXECUTE_ANSWER)
+                text: str = random.choice(config.EXECUTE_ANSWER)
 
             case "take_screenshot":
                 system_executor.take_screenshot()
-                text = random.choice(config.EXECUTE_ANSWER) + " . " + config.TAKE_SCREENSHOT_ANSWER
+                text: str = random.choice(config.EXECUTE_ANSWER) + " . " + config.TAKE_SCREENSHOT_ANSWER
+
+            case "get_geolocation":
+                current_location: tuple[str, str] = system_executor.get_location()
+                text: str = ("Текущее местоположение: "
+                             f"{current_location[0]} градусов по широте, "
+                             f"{current_location[1]} градусов по долготе.")
 
             case "poweroff":
-                text = random.choice(config.POWEROFF_MESSAGE_LIST)
+                text: str = random.choice(config.POWEROFF_MESSAGE_LIST)
                 audio_speaking.va_speak(text)
                 print(f"Ответ от {config.VA_NAME}: {text}")
                 exit()

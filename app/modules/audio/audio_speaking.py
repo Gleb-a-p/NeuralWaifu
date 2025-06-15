@@ -40,6 +40,11 @@ def turn_on_music() -> str:
     music_path = os.path.abspath(config.RELATIVE_VA_PATH).strip(config.RELATIVE_VA_PATH) + "u/app" + "\modules\ ".strip() + "audio\music"
     music = music_path + f"/{choice(os.listdir(music_path))}"
 
+    print("Доступная музыка: \n"
+          f"{os.listdir(music_path)}")
+
+    print(f"Текущая музыка: {music}")
+
     mixer.music.load(music)
     mixer.music.play()
 
@@ -56,6 +61,8 @@ def change_music(old_music_path) -> str:
     if len(os.listdir(music_path)) > 1:
         while music == old_music:
             music = f"/{choice(os.listdir(music_path))}"
+
+    print(f"Текущая музыка: {music}")
 
     mixer.music.load(music_path + music)
     mixer.music.play()
