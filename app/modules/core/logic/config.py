@@ -1,10 +1,14 @@
 # coding: utf-8
-# This is a configuration file with VA settings
+"""
+This is a configuration file with VA settings
+"""
 
 # Voice assistant
 VA_NAME: str = "Джарвис"
 
-VA_VERSION: str = "1.1.3"
+VA_ROOT_ID: int = 0
+
+VA_VERSION: str = "1.2.0"
 
 VA_WAKE_WORD_LIST: list[str] = [
     "джарвис",
@@ -12,7 +16,8 @@ VA_WAKE_WORD_LIST: list[str] = [
     "джар",
     "джордж",
     "джярвис",
-    "жарвис"
+    "жарвис",
+    # "просыпайся"
 ]
 
 # Command recognition word lists
@@ -116,6 +121,7 @@ VA_VOID_CMD_LIST: dict[str: list[str]] = {
         "включи звук",
         "пробуждение",
         "проснись",
+        "просыпайся",
         "верни звук",
         "стандартная громкость"
     ],
@@ -302,7 +308,7 @@ JOKER_LIST: list[str] = [
     "Черный юмор - это как вода в Африке. Она не до всех доходит."
 ]
 
-EXECUTE_ANSWER: list[str] = [
+EXECUTED_ANSWER_LIST: list[str] = [
     "будет исполнено",
     "есть, сэр",
     "понял, принял, выполняю",
@@ -310,19 +316,19 @@ EXECUTE_ANSWER: list[str] = [
     "запрос выполнен, сэр"
 ]
 
-PRAISE_ANSWER: list[str] = [
+PRAISE_ANSWERS: list[str] = [
     "спасибо, сэр",
     "рад вам служить, сэр",
     "всегда к вашим услугам, сэр"
 ]
 
-CENSURE_ANSWER: list[str] = [
+CENSURE_ANSWERS: list[str] = [
     "очень тонкое замечание, сэр",
     "как остроумно, сэр",
     "взаимно"
 ]
 
-CALL_ANSWER: list[str] = [
+CALL_ANSWERS: list[str] = [
     "да, сэр",
     "слушаю, сэр"
 ]
@@ -349,6 +355,8 @@ BASE_VOLUME: float = 0.66
 BASE_VOLUME_UP: float = 0.05
 BASE_VOLUME_DOWN: float = 0.05
 DEVICE: int = 1  # recorder ID
+DETECTING_SAMPLERATE: int = 16000
+SYNTHESIS_SAMPLERATE: int = 48000
 """
 Supported values for 'LANGUAGE' are:
     en (English, default)
@@ -408,6 +416,6 @@ Supported values for 'LANGUAGE' are:
     uk (Ukrainian)
     vi (Vietnamese)
 """
-LANGUAGE: str = "ru"
+VA_LANGUAGE: str = "ru"
 SCREENSHOT_NAME: str = "Screenshot"
 SCREENSHOT_EXTENSION: str = ".png"

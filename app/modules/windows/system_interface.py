@@ -1,6 +1,6 @@
 # coding: utf-8
 """
-This is a file for executing system commands
+This is a module for executing system commands for VA
 """
 
 import pyautogui

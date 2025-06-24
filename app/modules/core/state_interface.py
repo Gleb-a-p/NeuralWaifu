@@ -1,6 +1,6 @@
 # coding: ascii
 """
-This is a file, sets state for VA
+This is a module, sets state for VA
 """
 
 from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
