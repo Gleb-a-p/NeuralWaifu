@@ -8,7 +8,7 @@ import webbrowser
 import geocoder
 import num2words
 import datetime
-import subprocess
+import subprocess as sp
 import os
 
 
@@ -53,7 +53,7 @@ class SystemExecutor:
         try:
             script_path = os.path.split(script_file)[0].lstrip('"') + '/'
             print(f"Script directory: {script_path}")
-            result = subprocess.Popen([script_file], cwd=script_path)
+            result = sp.Popen([script_file], cwd=script_path)
             print(f"Успешный запуск файла {script_file}")
             print(f"Код запуска: {result}")
 

@@ -1,25 +1,23 @@
-# -*-coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """
 This is main file with import
-of all necessary libraries and functions.
+of all necessary libraries and modules.
 You need run this file to run project.
 """
 
 from openai import OpenAI
 from PyQt6.QtWidgets import QApplication
 from pygame import mixer
+import subprocess as sp
 import random
 import configparser
 import webbrowser
 import time
 import sys
 
-import app.modules.core.logic.config as config # Configuration
-import app.modules.graphics.gui as gui # Graphical interface
-from app.modules.audio.audio_interface import AudioDetection, AudioSynthesis # Audio
-# import app.modules.core.logic.dialogue as dialogue # Dialogue logic(Chat GPT)
-# import app.modules.audio.audio_detection as audio_detection # Audio(recognition)
-# import app.modules.audio.audio_speaking as audio_speaking # Audio(synthesis)
+import app.modules.core.logic.config as config # General configuration
+import app.modules.graphics.gui as gui # Graphical user interface
+from app.modules.audio.audio_interface import AudioDetection, AudioSynthesis # Audio interface
 from app.modules.core.logic.logic_interface import Core # Core of VA
 
 
@@ -68,17 +66,14 @@ class VoiceAssistance:
             detecting_samplerate,
             synthesis_samplerate,
             va_device,
-            va_relative_path
+            va_relative_path,
+            va_speaker
     ) -> None:
         self.start: float = time.time()  # recording the program launch time
 
         self.va_id = id
         self.va_name = name
         self.va_version = version
-
-        # self.uim = gui_module
-        # self.adm = audio_detection_module
-        # self.asm = audio_synthesis_module
 
         self.set_options_message = set_options_message
 
@@ -133,10 +128,12 @@ class VoiceAssistance:
         self.synthesis_samplerate = synthesis_samplerate
         self.va_device = va_device
         self.va_relative_path = va_relative_path
+        self.va_speaker = va_speaker
 
-        # Creating an application
+        # Creating an application(GUI)
         self.app: QApplication = QApplication(sys.argv)
 
+        # Creating audio module of VA
         self.audio_detect_module = AudioDetection(
             self.detecting_samplerate,
             self.va_device,
@@ -146,7 +143,8 @@ class VoiceAssistance:
 
         self.audio_synthes_module = AudioSynthesis(
             self.synthesis_samplerate,
-            self.va_relative_path
+            self.va_relative_path,
+            self.va_speaker
         )
 
         # Creating core of VA
@@ -206,16 +204,21 @@ class VoiceAssistance:
         self.end: float = time.time() # recording the end time of the program launch
 
     def __str__(self) -> str:
-        return f"Voice Assistant {self.va_name} ({self.va_version}) with ID:{self.va_id}"
+        return f"Voice Assistant {self.va_name} ({self.va_version}) with ID: {self.va_id}"
 
     def run(self) -> None:
         self.window.show()
 
         # Output debugging information
-        print(self.NeuralWaifu)
-        self.NeuralWaifu.get_debug_info( self.api_key, round(self.end - self.start, 1) )
+        print("Created a Voice Assistant with next settings: \n"
+              f" - Core: {self.NeuralWaifu}\n"
+              f" - GUI: {self.window}\n"
+              f" - Audio interface: {self.audio_detect_module} and {self.audio_synthes_module}"
+        )
+        self.NeuralWaifu.get_debug_info( self.api_key[:20] + "...", round(self.end - self.start, 1) )
 
         # Starting the event loop
+        # sp.Popen(["python", "self.app.exec()"])
         self.app.exec()
 
         # Starting the voice assistant
@@ -223,11 +226,32 @@ class VoiceAssistance:
             random.choice(self.va_greetings)
         )  # greeting at startup
         self.audio_detect_module.va_listen(
-            self.NeuralWaifu.va_respond,
+            self.window.response_to_audio # self.NeuralWaifu.va_respond,
         )  # start listening to commands
 
 
-def main():
+def get_modes_message() -> str:
+    choosing_message: str = ''
+
+    for mode, description in config.VA_MODES[:-1]:
+        choosing_message += f"{mode}: {description}\n"
+
+    choosing_message = config.MODE_CHOOSING_MESSAGE + "\n" + choosing_message
+
+    return choosing_message
+
+
+def choosing_va_mode() -> str:
+    mode: str = ''
+
+    while mode not in config.VA_MODES[-1]:
+        choosing_message: str = get_modes_message()
+        mode = input(choosing_message)
+
+    return mode
+
+
+def main() -> None:
     # Reading data from the configuration file
     conf: configparser.ConfigParser = configparser.ConfigParser()
     conf.read("../../../etc/config.ini")
@@ -235,19 +259,34 @@ def main():
 
     dialogue_history: list = [] # list for storing dialog history
 
-    Jarvis: VoiceAssistance = VoiceAssistance(
-        config.VA_ROOT_ID,
-        config.VA_NAME,
+    va_mode: str = choosing_va_mode()
+
+    match va_mode:
+        case "j":
+            import app.modules.core.roles.jarvis_config as specific_config
+            print("VA's mode is Jarvis")
+
+        case "m":
+            import app.modules.core.roles.miku_config as specific_config
+            print("VA's mode is Miku")
+
+        case _:
+            import app.modules.core.roles.jarvis_config as specific_config
+            print("VA's mode is Jarvis")
+
+    VA: VoiceAssistance = VoiceAssistance(
+        specific_config.VA_ID,
+        specific_config.VA_NAME,
         config.VA_VERSION,
         config.OPTIONS_MESSAGE,
         api_key,
         dialogue_history,
         config.BASE_GPT_URL,
-        config.PROMPT,
+        specific_config.VA_PROMPT,
         config.GPT_MODEL_LIST,
         config.GPT_FREE_MODEL_LIST,
         config.CHECKING_MESSAGE,
-        config.VA_WAKE_WORD_LIST,
+        specific_config.VA_WAKE_WORD_LIST,
         config.VA_SPEAKING_CMD_LIST,
         config.VA_VOID_CMD_LIST,
         config.BASE_BROWSER,
@@ -258,16 +297,16 @@ def main():
         config.GALLERY_PATH,
         config.BASE_URL,
         config.YOUTUBE_URL,
-        config.GREETING_LIST,
-        config.EXECUTED_ANSWER_LIST,
-        config.GREETING_MESSAGE,
+        specific_config.VA_GREETING_LIST,
+        specific_config.VA_EXECUTED_ANSWER_LIST,
+        specific_config.VA_GREETING_MESSAGE,
         config.NOT_UNDERSTAND_ANSWER,
         config.JOKER_LIST,
-        config.PRAISE_ANSWERS,
-        config.CENSURE_ANSWERS,
-        config.CALL_ANSWERS,
+        specific_config.VA_PRAISE_ANSWERS,
+        specific_config.VA_CENSURE_ANSWERS,
+        specific_config.VA_CALL_ANSWERS,
         config.TAKE_SCREENSHOT_ANSWER,
-        config.POWEROFF_MESSAGE_LIST,
+        specific_config.VA_POWEROFF_MESSAGE_LIST,
         config.CMD_PERCENT_DETECTION,
         config.BASE_VOLUME,
         config.BASE_VOLUME_UP,
@@ -278,11 +317,15 @@ def main():
         config.DETECTING_SAMPLERATE,
         config.SYNTHESIS_SAMPLERATE,
         config.DEVICE,
-        config.RELATIVE_VA_PATH
+        config.RELATIVE_VA_PATH,
+        specific_config.VA_SPEAKER
     )
 
-    print(Jarvis)
-    Jarvis.run()
+    print(VA)
+
+    VA.run()
+
+    print(f"Принудительное зевершение работы модели с ID: {specific_config.VA_ID}")
 
 
 if __name__ == "__main__":

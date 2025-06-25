@@ -90,9 +90,10 @@ class AudioDetection:
 
 
 class AudioSynthesis:
-    def __init__(self, samplerate, relative_va_path) -> None:
+    def __init__(self, samplerate, relative_va_path, va_speaker) -> None:
         self.samplerate: int = samplerate
         self.relative_va_path: str = relative_va_path
+        self.va_speaker = va_speaker
 
         self.device: torch.device = torch.device("cpu")  # cpu or gpu
         self.model, self._ = torch.hub.load(
@@ -108,7 +109,7 @@ class AudioSynthesis:
     def va_speak(self, message: str) -> None:
         audio = self.model.apply_tts(
             text=f"{message}..",
-            speaker="aidar",  # aidar, baya, kseniya, xenia, random
+            speaker=self.va_speaker,  # aidar, baya, kseniya, xenia, random
             sample_rate=self.samplerate,
             put_accent=True,
             put_yo=True

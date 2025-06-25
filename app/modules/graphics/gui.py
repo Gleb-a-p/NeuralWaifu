@@ -14,11 +14,11 @@ from PyQt6.QtWidgets import QMainWindow
 import random
 import time
 
-from app.modules.core.logic.config import VA_NAME, VA_VERSION
+from app.modules.core.logic.config import VA_VERSION
 
 
 class Ui_MainWindow(object):
-    def setupUi(self, MainWindow):
+    def setupUi(self, MainWindow, va_name):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(474, 304)
         MainWindow.setAnimated(True)
@@ -60,19 +60,23 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
+        self.va_name = va_name
+
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", f"{VA_NAME} {VA_VERSION}"))
+        MainWindow.setWindowTitle(_translate("MainWindow", f"{self.va_name} {VA_VERSION}"))
         self.lineEdit.setPlaceholderText(_translate("MainWindow", "Enter your message"))
         self.pushButton.setText(_translate("MainWindow", "Send message"))
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
-    def __init__(self, core, name):  # client, dialog, mod):
+    def __init__(self, core, name) -> None:  # client, dialog, mod):
         super().__init__()
-        self.setupUi(self)
+
         self.logic_core = core
         self.va_name = name
+
+        self.setupUi(self, self.va_name)
 
         # self.client = client
         # self.dialog = dialog
@@ -82,7 +86,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.pushButton.clicked.connect(self.button_clicked)
         self.pushButton.setCheckable(True)
 
-    def button_clicked(self):
+    def __str__(self):
+        return f"Main window of {self.logic_core.va_name}'s (ID: {self.logic_core.va_id}) GUI"
+
+    def button_clicked(self) -> None:
         print("Clicked!")
         entered_message = self.lineEdit.text()
 
@@ -113,3 +120,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             #     self.listWidget.addItem(dialogue.generate_response(dialogue_history=self.dialog, message=entered_message, mod=self.mod))
 
             # print(self.dialog)
+
+    def response_to_audio(self, message) -> str:
+        response = ''
+
+        if message.strip() != '':
+            self.listWidget.addItem(f"User: {message}")
+
+            response = self.logic_core.va_respond(
+                f"{self.va_name} " * (not (message.startswith(self.va_name))) + message)
+
+            self.listWidget.addItem(f"Джарвис: {response}")
+
+        return response

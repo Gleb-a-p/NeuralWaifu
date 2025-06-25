@@ -1,6 +1,6 @@
 # coding: utf-8
 """
-This file includes a VA's logical module(core)
+This module includes a VA's logical module(core)
 """
 
 from fuzzywuzzy import fuzz
@@ -9,8 +9,6 @@ from pygame import mixer
 import num2words
 import random
 
-# import app.modules.core.logic.config as config # Configuration
-# from app.modules.audio.audio_interface import AudioDetection, AudioSynthesis # Audio
 from app.modules.core.state_interface import StateInterface # Changing VA state
 from app.modules.windows.system_interface import SystemExecutor # Executing system commands
 
@@ -121,7 +119,7 @@ class Core:
     # Getting debugging information
     def get_debug_info(self, api_key, time):
         print(
-            f"{self.va_name} (v{self.va_version}) начал свою работу ...\n"
+            f"{self.va_name} (v{self.va_version}) начал(а) свою работу ...\n"
             f"Api key: {api_key}\n"
             f"OpenAI client: {self.va_llm_client}\n"
             f"Mod = {self.va_mod}\n"
@@ -340,6 +338,8 @@ class Core:
                     text: str = random.choice(self.va_poweroff_messages)
                     self.asm.va_speak(text)
                     print(f"Ответ от {self.va_name}: {text}")
+
+                    print(f"Завершение работы модели с ID: {self.va_id}")
                     exit()
 
         print(f"Ответ от {self.va_name}: {text}")
