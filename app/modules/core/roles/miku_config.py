@@ -70,7 +70,7 @@ VA_POWEROFF_MESSAGE_LIST: list[str] = [
     "пока-пока",
     "выключаюсь",
     "прощай"
-] # Сайонарра, сэр
+]
 
 # Constants
 VA_SPEAKER: str = "kseniya"

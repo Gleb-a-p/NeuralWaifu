@@ -51,6 +51,7 @@ class AudioDetection:
                 if rec.AcceptWaveform(data):
                     # Suspend the microphone listening while the assistant is responding
                     stream.stop()
+                    print("Аудиоввод приостановлен")
 
                     res = callback(
                         json.loads(rec.Result())["text"],
@@ -58,6 +59,7 @@ class AudioDetection:
 
                     # Resume listening to the microphone
                     stream.start()
+                    print("Аудиоввод возобновлен")
 
     # Function for recognizing the assistant's name in a speech segment
     def va_wake_word_recognition(self, word: str) -> bool:

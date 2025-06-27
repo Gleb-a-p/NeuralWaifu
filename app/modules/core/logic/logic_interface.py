@@ -147,10 +147,10 @@ class Core:
 
             if (
                     cmd["cmd"] not in self.va_speaking_cmds.keys() or
-                    cmd["percent"] <= self.va_cmd_recognition_probability
+                    cmd["percent"] < self.va_cmd_recognition_probability
             ) and (
                     cmd["cmd"] not in self.va_void_cmds.keys() or
-                    cmd["percent"] <= self.va_cmd_recognition_probability
+                    cmd["percent"] < self.va_cmd_recognition_probability
             ):
                 match self.va_mod:
                     case "base":

@@ -325,7 +325,7 @@ def main() -> None:
 
     VA.run()
 
-    print(f"Принудительное зевершение работы модели с ID: {specific_config.VA_ID}")
+    print(f"Принудительное завершение работы модели (ID: {specific_config.VA_ID})")
 
 
 if __name__ == "__main__":
