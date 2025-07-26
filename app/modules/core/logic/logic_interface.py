@@ -5,6 +5,7 @@ This module includes a VA's logical module(core)
 
 from fuzzywuzzy import fuzz
 from g4f.client import Client
+from openai import OpenAI
 from pygame import mixer
 import num2words
 import random
@@ -27,6 +28,7 @@ class Core:
             va_prompt,
             va_gpt_models,
             va_free_gpt_models,
+            va_lmstudio_model,
             llm_client_checking_message,
             va_wws,
             va_speaking_cmds,
@@ -45,6 +47,7 @@ class Core:
             va_praise_answers,
             va_censure_answers,
             va_calling_answers,
+            va_potential_calling_answers,
             va_take_screenshot_answers,
             va_poweroff_messages,
             va_cmd_recognition_probability,
@@ -67,6 +70,7 @@ class Core:
         self.llm_client_checking_message = llm_client_checking_message
         self.va_gpt_models = va_gpt_models
         self.va_free_gpt_models = va_free_gpt_models
+        self.va_lmstudio_model = va_lmstudio_model
         self.va_mod: str = self.set_mod("base") # choosing work mode for VA
 
         self.va_wws = va_wws
@@ -90,6 +94,7 @@ class Core:
         self.va_praise_answers = va_praise_answers
         self.va_censure_answers = va_censure_answers
         self.va_calling_answers = va_calling_answers
+        self.va_potential_calling_answers = va_potential_calling_answers
         self.va_take_screenshot_answers = va_take_screenshot_answers
         self.va_poweroff_messages = va_poweroff_messages
 
@@ -128,14 +133,14 @@ class Core:
 
     # Voice command reading function
     def va_respond(self, message) -> str:
-        detected_message = (self.adm.va_wake_word_detection(message))
+        detected_message = self.adm.va_wake_word_detection(message)
         print(f"Detected message = {detected_message}")
 
         if detected_message:
             detected_message.strip()
             detected_message.strip('?')
 
-        if detected_message:  # message.startswith(config.VA_WAKE_WORD_LIST):
+        if detected_message != None:  # message.startswith(config.VA_WAKE_WORD_LIST):
             print(message)
             print(self.va_dialogue_history)
 
@@ -152,46 +157,36 @@ class Core:
                     cmd["cmd"] not in self.va_void_cmds.keys() or
                     cmd["percent"] < self.va_cmd_recognition_probability
             ):
-                match self.va_mod:
-                    case "base":
-                        try:
-                            response = self.generate_response(
-                                message=message,
-                                mod=self.va_mod
-                            )
+                try:
+                    response = self.generate_response(
+                        message=message,
+                        mod=self.va_mod
+                    )
 
-                            corrected_response: str = self.correct_response(response)
-                            print(corrected_response)
+                    corrected_response: str = self.correct_response(response)
+                    print(corrected_response)
 
-                            self.asm.va_speak(corrected_response)
+                    self.asm.va_speak(corrected_response)
 
-                        except Exception as err:
-                            print(
-                                f"Ошибка при получении ответа: {err}",
-                                "Полный ответ смотрите в логах(dialogue_history)"
-                            )
-                    case "free":
-                        try:
-                            response = self.generate_response(
-                                message=message,
-                                mod=self.va_mod
-                            )
-
-                            corrected_response: str = self.correct_response(response)
-                            print(corrected_response)
-
-                            self.asm.va_speak(corrected_response)
-
-                        except Exception as err:
-                            print(
-                                f"Ошибка при получении ответа: {err}",
-                                "Полный ответ смотрите в логах(dialogue_history)"
-                            )
+                except Exception as err:
+                    print(
+                        f"Ошибка при получении ответа: {err}",
+                        "Полный ответ смотрите в логах(dialogue_history, log.txt)"
+                    )
             else:
                 result = self.execute_cmd(
                     cmd['cmd'],
                 )
                 response = result
+
+            separated_response = response.lstrip("<think>").split("</think>")
+            thinks = "---"
+
+            if len(separated_response) == 2:
+                thinks, response = separated_response[0], separated_response[1]
+            elif len(separated_response) == 1:
+                response = separated_response[0]
+            self.add_log(message, thinks, response)
 
             return response
 
@@ -246,8 +241,11 @@ class Core:
                 case "censure":
                     text = random.choice(self.va_censure_answers)
 
-                case 'call':
+                case "call":
                     text = random.choice(self.va_calling_answers)
+
+                case "potential_call":
+                    text = random.choice(self.va_potential_calling_answers)
 
         elif cmd in self.va_void_cmds:
             match cmd:
@@ -299,6 +297,7 @@ class Core:
                     self.asm.va_speak(text)
                     self.va_music: str = self.asm.turn_on_music()
                     print(f"Ответ от {self.va_name}: {text}")
+
                     return text
 
                 case "stop_music":
@@ -310,6 +309,7 @@ class Core:
                     self.asm.va_speak(text)
                     mixer.music.unpause()
                     print(f"Ответ от {self.va_name}: {text}")
+
                     return text
 
                 case "change_music":
@@ -318,6 +318,7 @@ class Core:
                     self.asm.va_speak(text)
                     self.va_music: str = self.asm.change_music(self.va_music)
                     print(f"Ответ от {self.va_name}: {text}")
+
                     return text
 
                 case "turn_off_music":
@@ -334,13 +335,15 @@ class Core:
                                  f"{current_location[0]} градусов по широте, "
                                  f"{current_location[1]} градусов по долготе.")
 
-                case "poweroff":
-                    text: str = random.choice(self.va_poweroff_messages)
+                case "lock_computer":
+                    text: str = random.choice(self.va_executed_answers)
                     self.asm.va_speak(text)
-                    print(f"Ответ от {self.va_name}: {text}")
+                    self.system_executor.run_script("rundll32 user32.dll, LockWorkStation")
 
-                    print(f"Завершение работы модели с ID: {self.va_id}")
-                    exit()
+                    return text
+
+                case "poweroff":
+                    self.poweroff()
 
         print(f"Ответ от {self.va_name}: {text}")
         self.asm.va_speak(text)
@@ -367,20 +370,59 @@ class Core:
 
         return corrected_response
 
+    # Function for making request to LLM model
+    def make_request(self, llm_client, model) -> str:
+        try:
+            chat_completion = llm_client.chat.completions.create(
+                model=model,
+                messages=self.va_dialogue_history,
+                temperature = 0.6
+            )
+
+            response = chat_completion.choices[0].message.content.strip()
+
+            self.va_dialogue_history.append(
+                {
+                    "role": "assistant",
+                    "content": response
+                }
+            )
+
+            return response
+
+        except Exception as err:
+            print(err)
+            return ''
+
     # Function for receiving a response from ChatGPT
     def generate_response(self, message: str, mod) -> str:
         if mod == "free":
             self.va_llm_client=Client()
+        elif mod == "lmstudio":
+            self.va_llm_client=OpenAI(
+                base_url="http://localhost:1234/v1",
+                api_key="lm-studio"
+            )
 
         try:
             # Adding instruction for communication style if it is new dialog
             if not self.va_dialogue_history:
-                self.va_dialogue_history.append(
-                    {
-                        "role": "user",
-                        "content": self.va_prompt
-                    }
-                )
+                if mod == "base":
+                    self.va_dialogue_history.append(
+                        {
+                            "role": "user",
+                            "content": self.va_prompt
+                        }
+                    )
+                    self.add_log(self.va_prompt, "---", "---", address="User")
+                else:
+                    self.va_dialogue_history.append(
+                        {
+                            "role": "system",
+                            "content": self.va_prompt
+                        }
+                    )
+                    self.add_log(self.va_prompt, "---", "---", address="System")
 
             self.va_dialogue_history.append(
                 {
@@ -390,56 +432,29 @@ class Core:
             )
 
             # Getting a response from LLM Model
-            if mod == "base":  # If the API key for ChatGPT is working, use it
-                # Обращение к OpenAI API
-                # chat_completion = client.chat.completions.create(
-                #     model=config.GPT_MODEL,
-                #     messages=dialogue_history
-                # )
+            match mod:
+                case "base":  # If the API key for ChatGPT is working, use it
+                    # Обращение к OpenAI API
+                    # chat_completion = client.chat.completions.create(
+                    #     model=config.GPT_MODEL,
+                    #     messages=dialogue_history
+                    # )
 
-                for model in self.va_gpt_models:  # Перебор возможных моделей
-                    try:
-                        chat_completion = self.va_llm_client.chat.completions.create(
-                            model=model,
-                            messages=self.va_dialogue_history
-                        )
+                    for model in self.va_gpt_models:  # Перебор возможных моделей
+                        resp = self.make_request(self.va_llm_client, model)
 
-                        response = chat_completion.choices[0].message.content.strip()
+                        if resp:
+                            return resp
 
-                        self.va_dialogue_history.append(
-                            {
-                                "role": "assistant",
-                                "content": response
-                            }
-                        )
+                case "free":  # Если апи-ключ для ChatGPT не рабочий, то используем свободную версию
+                    for gpt_model in self.va_free_gpt_models:  # Перебор всевозможных free-моделей
+                        resp = self.make_request(self.va_llm_client, gpt_model)
 
-                        return response
+                        if resp:
+                            return resp
 
-                    except Exception as err:
-                        print(err)
-                        continue
-
-            elif mod == "free":  # Если апи-ключ для ChatGPT не рабочий, то используем свободную версию
-                for gpt_model in self.va_free_gpt_models:  # Перебор всевозможных free-моделей
-                    try:
-                        chat_completion = self.va_llm_client.chat.completions.create(
-                            model=gpt_model,
-                            messages=self.va_dialogue_history,
-                        )
-                        response = chat_completion.choices[0].message.content
-
-                        self.va_dialogue_history.append(
-                            {
-                                "role": "assistant",
-                                "content": response
-                            }
-                        )
-
-                        return response
-
-                    except Exception as err:
-                        print(err)
-                        continue
+                case "lmstudio":
+                    return self.make_request(self.va_llm_client, self.va_lmstudio_model)
 
         except Exception as error:
             print(f"Произошла ошибка: {error}")
@@ -452,7 +467,7 @@ class Core:
         mod: str = ''
         m = input(self.set_options_message)
 
-        while m not in ('b', 'f'):
+        while m not in ('b', 'f', 'lms'):
             m = input(self.set_options_message)
         else:
             match m:
@@ -462,17 +477,57 @@ class Core:
                 case 'f':
                     mod = "free"
 
+                case 'lms':
+                    mod = "lmstudio"
+
         return mod
 
     # Function for correcting a work mode for the assistant
     def set_mod(self, mod) -> str:
         # Checking the OpenAI client for correctness
-        if self.generate_response(
-                self.llm_client_checking_message,
-                mod
-        ) == '':  # If api key does not work, use free model
+        if not(
+                self.generate_response(
+                    self.llm_client_checking_message,
+                    mod
+                )
+        ):  # If api key does not work, use free model
             mod = "free"
+            if not (
+                    self.generate_response(
+                        self.llm_client_checking_message,
+                        "free"
+                    )
+            ):
+                mod = "lmstudio"
         else:
             mod = self.get_mod()
 
+        print(self.va_dialogue_history)
+        self.va_dialogue_history = []
+
         return mod
+
+    # Function for adding logs to file
+    def add_log(self, message, thinks, response, address="User"):
+        try:
+            with open("log.txt", "a") as log:
+                log.write(f"{address}: {message}\n")
+                log.write(f"{self.va_name} thinks: {thinks}\n")
+                log.write(f"{self.va_name}: {response}\n")
+        except Exception as err:
+            print(f"Ошибка при прочтении лог-файла: {err}. Создается новый лог-файл.")
+            with open("log.txt", "w") as log:
+                log.write(f"{address}: {message}\n")
+                log.write(f"{self.va_name} thinks: {thinks}\n")
+                log.write(f"{self.va_name}: {response}\n")
+
+        log.close()
+
+    # Function for turning off the assistant
+    def poweroff(self):
+        text: str = random.choice(self.va_poweroff_messages)
+        self.asm.va_speak(text)
+        print(f"Ответ от {self.va_name}: {text}")
+        print(f"Завершение работы модели с ID: {self.va_id}")
+
+        exit()

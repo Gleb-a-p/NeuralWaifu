@@ -79,16 +79,17 @@ class AudioDetection:
 
         for i in range(len(separated_message)):
             if self.va_wake_word_recognition(separated_message[i]):
-                ask = ''
+                ask = ' '.join(separated_message[i + 1:])
 
-                for word in separated_message[i + 1:]:
-                    ask += f"{word} "
+                # for word in separated_message[i + 1:]:
+                #     ask += f"{word} "
 
                 print(f"Модель распознала следующее обращение: {ask}")
 
                 return ask
 
-        return ''
+        return None
+        # return ''
 
 
 class AudioSynthesis:

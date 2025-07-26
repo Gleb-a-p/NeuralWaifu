@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-This is main file with import
+This is main file, includes import
 of all necessary libraries and modules.
 You need run this file to run project.
 """
@@ -15,7 +15,7 @@ import webbrowser
 import time
 import sys
 
-import app.modules.core.logic.config as config # General configuration
+import app.modules.core.logic.general_config as general_config # General configuration
 import app.modules.graphics.gui as gui # Graphical user interface
 from app.modules.audio.audio_interface import AudioDetection, AudioSynthesis # Audio interface
 from app.modules.core.logic.logic_interface import Core # Core of VA
@@ -34,6 +34,7 @@ class VoiceAssistance:
             va_prompt,
             va_gpt_models,
             va_free_gpt_models,
+            va_lmstudio_model,
             llm_client_checking_message,
             va_wws,
             va_speaking_cmds,
@@ -54,6 +55,7 @@ class VoiceAssistance:
             va_praise_answers,
             va_censure_answers,
             va_calling_answers,
+            va_potential_calling_answers,
             va_take_screenshot_answers,
             va_poweroff_messages,
             va_cmd_recognition_probability,
@@ -83,12 +85,13 @@ class VoiceAssistance:
         # Initializing an OpenAI client
         self.va_llm_client: OpenAI = OpenAI(
             api_key=self.api_key,
-            base_url=config.BASE_GPT_URL # base_url="https://api.proxyapi.ru/openai/v1",
+            base_url=self.base_gpt_url # base_url="https://api.proxyapi.ru/openai/v1",
         )
         self.va_prompt = va_prompt
         self.llm_client_checking_message = llm_client_checking_message
         self.va_gpt_models = va_gpt_models
         self.va_free_gpt_models = va_free_gpt_models
+        self.va_lmstudio_model = va_lmstudio_model
 
         self.va_wws = va_wws
 
@@ -113,6 +116,7 @@ class VoiceAssistance:
         self.va_praise_answers = va_praise_answers
         self.va_censure_answers = va_censure_answers
         self.va_calling_answers = va_calling_answers
+        self.va_potential_calling_answers = va_potential_calling_answers
         self.va_take_screenshot_answers = va_take_screenshot_answers
         self.va_poweroff_messages = va_poweroff_messages
 
@@ -160,6 +164,7 @@ class VoiceAssistance:
             self.va_prompt,
             self.va_gpt_models,
             self.va_free_gpt_models,
+            self.va_lmstudio_model,
             self.llm_client_checking_message,
             self.va_wws,
             self.va_speaking_cmds,
@@ -178,6 +183,7 @@ class VoiceAssistance:
             self.va_praise_answers,
             self.va_censure_answers,
             self.va_calling_answers,
+            self.va_potential_calling_answers,
             self.va_take_screenshot_answers,
             self.va_poweroff_messages,
             self.va_cmd_recognition_probability,
@@ -233,10 +239,10 @@ class VoiceAssistance:
 def get_modes_message() -> str:
     choosing_message: str = ''
 
-    for mode, description in config.VA_MODES[:-1]:
+    for mode, description in general_config.VA_MODES[:-1]:
         choosing_message += f"{mode}: {description}\n"
 
-    choosing_message = config.MODE_CHOOSING_MESSAGE + "\n" + choosing_message
+    choosing_message = general_config.MODE_CHOOSING_MESSAGE + "\n" + choosing_message
 
     return choosing_message
 
@@ -244,7 +250,7 @@ def get_modes_message() -> str:
 def choosing_va_mode() -> str:
     mode: str = ''
 
-    while mode not in config.VA_MODES[-1]:
+    while mode not in general_config.VA_MODES[-1]:
         choosing_message: str = get_modes_message()
         mode = input(choosing_message)
 
@@ -257,6 +263,8 @@ def main() -> None:
     conf.read("../../../etc/config.ini")
     api_key: str = conf['DEFAULT']['Api_key']
 
+    models_ids: list = [] # list with ids of working models
+
     dialogue_history: list = [] # list for storing dialog history
 
     va_mode: str = choosing_va_mode()
@@ -264,66 +272,72 @@ def main() -> None:
     match va_mode:
         case "j":
             import app.modules.core.roles.jarvis_config as specific_config
-            print("VA's mode is Jarvis")
 
         case "m":
             import app.modules.core.roles.miku_config as specific_config
-            print("VA's mode is Miku")
 
         case _:
             import app.modules.core.roles.jarvis_config as specific_config
-            print("VA's mode is Jarvis")
 
-    VA: VoiceAssistance = VoiceAssistance(
-        specific_config.VA_ID,
-        specific_config.VA_NAME,
-        config.VA_VERSION,
-        config.OPTIONS_MESSAGE,
-        api_key,
-        dialogue_history,
-        config.BASE_GPT_URL,
-        specific_config.VA_PROMPT,
-        config.GPT_MODEL_LIST,
-        config.GPT_FREE_MODEL_LIST,
-        config.CHECKING_MESSAGE,
-        specific_config.VA_WAKE_WORD_LIST,
-        config.VA_SPEAKING_CMD_LIST,
-        config.VA_VOID_CMD_LIST,
-        config.BASE_BROWSER,
-        config.TERRARIA_PATH,
-        config.TMODLOADER_PATH,
-        config.CHROME_PATH,
-        config.GOODBYE_DPI_PATH,
-        config.GALLERY_PATH,
-        config.BASE_URL,
-        config.YOUTUBE_URL,
-        specific_config.VA_GREETING_LIST,
-        specific_config.VA_EXECUTED_ANSWER_LIST,
-        specific_config.VA_GREETING_MESSAGE,
-        config.NOT_UNDERSTAND_ANSWER,
-        config.JOKER_LIST,
-        specific_config.VA_PRAISE_ANSWERS,
-        specific_config.VA_CENSURE_ANSWERS,
-        specific_config.VA_CALL_ANSWERS,
-        config.TAKE_SCREENSHOT_ANSWER,
-        specific_config.VA_POWEROFF_MESSAGE_LIST,
-        config.CMD_PERCENT_DETECTION,
-        config.BASE_VOLUME,
-        config.BASE_VOLUME_UP,
-        config.BASE_VOLUME_DOWN,
-        config.VA_LANGUAGE,
-        config.SCREENSHOT_NAME,
-        config.SCREENSHOT_EXTENSION,
-        config.DETECTING_SAMPLERATE,
-        config.SYNTHESIS_SAMPLERATE,
-        config.DEVICE,
-        config.RELATIVE_VA_PATH,
-        specific_config.VA_SPEAKER
-    )
+    if not(specific_config.VA_ID in models_ids):
+        print(f"VA's mode is {specific_config.VA_NAME}")
+        VA: VoiceAssistance = VoiceAssistance(
+            specific_config.VA_ID,
+            specific_config.VA_NAME,
+            general_config.VA_VERSION,
+            general_config.OPTIONS_MESSAGE,
+            api_key,
+            dialogue_history,
+            general_config.BASE_GPT_URL,
+            specific_config.VA_PROMPT,
+            general_config.GPT_MODEL_LIST,
+            general_config.GPT_FREE_MODEL_LIST,
+            general_config.LMSTUDIO_MODEL,
+            general_config.CHECKING_MESSAGE,
+            specific_config.VA_WAKE_WORD_LIST,
+            general_config.VA_SPEAKING_CMD_LIST,
+            general_config.VA_VOID_CMD_LIST,
+            general_config.BASE_BROWSER,
+            general_config.TERRARIA_PATH,
+            general_config.TMODLOADER_PATH,
+            general_config.CHROME_PATH,
+            general_config.GOODBYE_DPI_PATH,
+            general_config.GALLERY_PATH,
+            general_config.BASE_URL,
+            general_config.YOUTUBE_URL,
+            specific_config.VA_GREETING_LIST,
+            specific_config.VA_EXECUTED_ANSWER_LIST,
+            specific_config.VA_GREETING_MESSAGE,
+            general_config.NOT_UNDERSTAND_ANSWER,
+            general_config.JOKER_LIST,
+            specific_config.VA_PRAISE_ANSWERS,
+            specific_config.VA_CENSURE_ANSWERS,
+            specific_config.VA_CALL_ANSWERS,
+            specific_config.VA_POTENTIAL_CALL_ANSWERS,
+            general_config.TAKE_SCREENSHOT_ANSWER,
+            specific_config.VA_POWEROFF_MESSAGE_LIST,
+            general_config.CMD_PERCENT_DETECTION,
+            general_config.BASE_VOLUME,
+            general_config.BASE_VOLUME_UP,
+            general_config.BASE_VOLUME_DOWN,
+            general_config.VA_LANGUAGE,
+            general_config.SCREENSHOT_NAME,
+            general_config.SCREENSHOT_EXTENSION,
+            general_config.DETECTING_SAMPLERATE,
+            general_config.SYNTHESIS_SAMPLERATE,
+            general_config.DEVICE,
+            general_config.RELATIVE_VA_PATH,
+            specific_config.VA_SPEAKER
+        )
+        models_ids.append(specific_config.VA_ID)
 
-    print(VA)
+        print(VA)
+        VA.run() # Джарвис работает в штатном режиме, сэр
 
-    VA.run()
+    else:
+        print("Операция не позволена. \n"
+              f"Не разрешен запуск модели с ID: {specific_config.VA_ID}. \n"
+              "Модель с таким ID уже запущена.")
 
     print(f"Принудительное завершение работы модели (ID: {specific_config.VA_ID})")
 

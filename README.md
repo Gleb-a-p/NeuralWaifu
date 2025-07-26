@@ -1,4 +1,4 @@
-# NeuralWaifu (Temporarily - Jarvis) (very early)
+# NeuralWaifu (Temporarily - Jarvis) (very early) Beta version
 Voice Assistant created using Python and neural networks. 
 The main advantages of our project is:
  - 100% offline (no cloud)
@@ -26,6 +26,7 @@ You can get the API key on the OpenRouter website (link: https://openrouter.ai/)
 It will also work without an api key, but worse because it uses a free model. Without the Internet, it will recognize commands, but will not be able to access the OpenAI api key.
 The VA can play music that is saved in the `/app/modules/audio/music/` folder. Screenshots are saved in the `C:/Users/[user]/Desktop/Screenshots/` folder.
 Also, you need to correct all file paths in `/app/modules/core/logic/config.py` (Links and file paths), if it needs.
+Finally, for Jarvis' offline working you need install LMStudio and run it on 1234 port (it is default port).
 
 ## Supported Languages
 Currently, only Russian language is supported.

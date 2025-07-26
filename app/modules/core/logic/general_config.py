@@ -4,7 +4,7 @@ This is a configuration module with general VA settings
 """
 
 # Voice assistant
-VA_VERSION: str = "1.2.0"
+VA_VERSION: str = "1.2.2b"
 
 VA_MODES: list[list[str]] = [
     ["j", "Jarvis"],
@@ -22,6 +22,8 @@ VA_SPEAKING_CMD_LIST: dict[str: list[str]] = {
     # ],
     "help": [
         "список команд",
+        "кто ты",
+        "ты кто",
         "команды",
         "что ты умеешь",
         "твои навыки",
@@ -56,6 +58,10 @@ VA_SPEAKING_CMD_LIST: dict[str: list[str]] = {
     ],
     "call": [
         "ты тут",
+        # ''
+    ],
+    "potential_call": [
+        ' ',
         ''
     ]
 }
@@ -98,7 +104,8 @@ VA_VOID_CMD_LIST: dict[str: list[str]] = {
     "run_goodbye_dpi": [
         "запусти гудбай д п ай",
         "запусти гудбай",
-        "гудбай д п ай"
+        "гудбай д п ай",
+        "запусти обход блокировок"
     ],
     "sleep": [
         "не мешай",
@@ -190,10 +197,22 @@ VA_VOID_CMD_LIST: dict[str: list[str]] = {
         "определи текущее местоположение устройства",
         "определи местоположение устройства"
     ],
+    "lock_computer": [
+        "заблокируй устройство",
+        "заблокируй компьютер",
+        "заблочь комп",
+        "заблокируй доступ",
+        "заблокируй экран",
+        "заблочь экран"
+    ],
     "poweroff": [
         "выключайся",
         "завершение работы",
-        "выключись"
+        "выключись",
+        "выключить",
+        "выключить нахуй",
+        "выключись нахуй",
+        "закройся"
     ]
 }
 
@@ -223,13 +242,18 @@ GPT_FREE_MODEL_LIST: list[str] = [
     "gpt-4-turbo"
 ]
 
+LMSTUDIO_MODEL: str = "deepseek-r1-0528-qwen3-8b"
+
 OPTIONS_MESSAGE: str = (
     "Options:\n"
-    "'b' - base mode"
+    "'b' - base mode\n"
     "(your API_KEY will be used), high quality\n"
-    "'f' - free mode"
+    "'f' - free mode\n"
     "(your API_KEY won't be used, free model), low quality\n"
-    "Please, select one of suggested options(b, f): "
+    "'lms' - lmstudio\n"
+    "(uses the computing power of your computer, not recommended on a weak computer), \n"
+    "quality is adjustable and depends on the local machine\n"
+    "Please, select one of suggested options(b, f, lms): "
 )
 
 MODE_CHOOSING_MESSAGE: str = "Please, select one from suggested VA's work modes: "

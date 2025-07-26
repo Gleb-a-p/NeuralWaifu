@@ -77,7 +77,8 @@ class SystemExecutor:
             if geo_location.ok:
                 location = geo_location.latlng
                 latitude, longitude = location
-                print(f"Широта: {latitude},\n"
+                print(f"Location: {location}\n"
+                      f"Широта: {latitude},\n"
                       f"Долгота: {longitude}")
 
                 return num2words.num2words(latitude, lang=self.language), num2words.num2words(longitude, lang=self.language)

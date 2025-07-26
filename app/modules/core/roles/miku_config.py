@@ -66,6 +66,10 @@ VA_CALL_ANSWERS: list[str] = [
     "хай"
 ]
 
+VA_POTENTIAL_CALL_ANSWERS: list[str] = [
+    "вы говорили обо мне, господин?",
+]
+
 VA_POWEROFF_MESSAGE_LIST: list[str] = [
     "пока-пока",
     "выключаюсь",

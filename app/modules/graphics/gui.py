@@ -14,7 +14,7 @@ from PyQt6.QtWidgets import QMainWindow
 import random
 import time
 
-from app.modules.core.logic.config import VA_VERSION
+from app.modules.core.logic.general_config import VA_VERSION
 
 
 class Ui_MainWindow(object):
@@ -87,7 +87,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.pushButton.setCheckable(True)
 
     def __str__(self):
-        return f"Main window of {self.logic_core.va_name}'s (ID: {self.logic_core.va_id}) GUI"
+        return f"Main window of {self.logic_core.va_name} (ID: {self.logic_core.va_id}) GUI"
 
     def button_clicked(self) -> None:
         print("Clicked!")
@@ -109,10 +109,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             #     self.music
             # )
 
+            # response = self.logic_core.va_respond(
+            #     f"{self.va_name} " * (not (entered_message.startswith(self.va_name))) + entered_message)
             response = self.logic_core.va_respond(
-                f"{self.va_name} " * (not (entered_message.startswith(self.va_name))) + entered_message)
+                f"{self.va_name} " * ( not(self.logic_core.adm.va_wake_word_recognition(entered_message.split()[0])) ) + entered_message
+            )
 
-            self.listWidget.addItem(f"Джарвис: {response}")
+            self.listWidget.addItem(f"{self.va_name}: {response}")
 
             # if self.mod == "base":
             #     self.listWidget.addItem(dialogue.generate_response(self.dialog, entered_message, self.mod, self.client))
@@ -127,9 +130,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if message.strip() != '':
             self.listWidget.addItem(f"User: {message}")
 
-            response = self.logic_core.va_respond(
-                f"{self.va_name} " * (not (message.startswith(self.va_name))) + message)
+            response = self.logic_core.va_respond(message)
 
-            self.listWidget.addItem(f"Джарвис: {response}")
+            self.listWidget.addItem(f"{self.va_name}: {response}")
 
         return response
