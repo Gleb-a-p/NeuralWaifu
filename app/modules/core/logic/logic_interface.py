@@ -532,8 +532,10 @@ class Core:
                 log.write(f"{self.va_name} thinks: {thinks}\n")
                 log.write(f"{self.va_name}: {response}\n")
                 log.write("\n")
+
         except Exception as err:
             print(f"Ошибка при прочтении лог-файла: {err}. Создается новый лог-файл.")
+
             with open("log.txt", "w") as log:
                 log.write(f"{address}: {message}\n")
                 log.write(f"{self.va_name} thinks: {thinks}\n")

@@ -263,7 +263,7 @@ GOODBYE_DPI_PATH: str = "C:/Users/gleba/Desktop/goodbyedpi-0.2.3rc1-2/goodbyedpi
 CHROME_PATH: str = "C:/Program Files/Google/Chrome/Application/chrome.exe"
 GALLERY_PATH: str = "C:/Users/gleba/Desktop/Screenshots"
 BASE_BROWSER: str = "google-chrome"
-BASE_URL: str = "http://python.org"
+BASE_URL: str = "https://python.org"
 YOUTUBE_URL: str = "https://www.youtube.com"
 BASE_GPT_URL: str = "https://openrouter.ai/api/v1"
 LOCALHOST_URL: str = "http://localhost:1234/v1"
@@ -292,7 +292,7 @@ OPTIONS_MESSAGE: str = (
     "(your API_KEY won't be used, free model), low quality\n"
     "'lms' - lmstudio\n"
     "(uses the computing power of your computer, not recommended on a weak computer), \n"
-    "quality is adjustable and depends on the local machine\n"
+    "quality is adjustable and depends on the local machine and choosed LLM model\n"
     "Please, select one of suggested options(b, f, lms): "
 )
 
