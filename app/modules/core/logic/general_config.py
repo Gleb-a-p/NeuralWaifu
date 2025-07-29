@@ -3,12 +3,16 @@
 This is a configuration module with general VA settings
 """
 
+# import os
+import platform
+
+
 # Voice assistant
-VA_VERSION: str = "1.2.2b"
+VA_VERSION: str = "1.2.4b"
 
 VA_MODES: list[list[str]] = [
     ["j", "Jarvis"],
-    ["m", "Miku"],
+    ["m", "Mita"],
     # ["w", "Wendy"],
     ["j", "m"]
 ]
@@ -133,13 +137,15 @@ VA_VOID_CMD_LIST: dict[str: list[str]] = {
         "чуть выше громкость",
         "громкость чуть выше",
         "сделай громкость побольше",
-        "сделай громкость повыше"
+        "сделай громкость повыше",
+        "сделай чуть погромче"
     ],
     "volume_down": [
         "чуть ниже громкость",
         "громкость чуть ниже",
         "сделай громкость поменьше",
-        "сделай громкость пониже"
+        "сделай громкость пониже",
+        "сделай чуть потише"
     ],
     "turn_on_music": [
         "музыка",
@@ -175,6 +181,12 @@ VA_VOID_CMD_LIST: dict[str: list[str]] = {
         "смени музыку",
         "измени музыку"
     ],
+    "loop_music": [
+        "зацикли музон",
+        "зацикли музяку",
+        "зацикли музыку",
+        "зацикли музло"
+    ],
     "turn_off_music": [
         "тишина",
         "тихо",
@@ -197,13 +209,38 @@ VA_VOID_CMD_LIST: dict[str: list[str]] = {
         "определи текущее местоположение устройства",
         "определи местоположение устройства"
     ],
+    "get_battery_charge": [
+        "определи заряд батареи",
+        "определи остаток заряда батареи",
+        "определи баратею",
+        "сколько заряд",
+        "сколько батареи",
+        "какой заряд",
+        "определи заряд"
+    ],
     "lock_computer": [
         "заблокируй устройство",
         "заблокируй компьютер",
         "заблочь комп",
         "заблокируй доступ",
         "заблокируй экран",
-        "заблочь экран"
+        "заблочь экран",
+        "блок"
+    ],
+    "computer_sleep": [
+        "переведи компьютер в сон",
+        "переведи компьютер в спящий режим",
+        "компьютер в сон",
+        "отправь компьютер в спящий режим",
+        "отправь компьютер в спячку",
+        "отключи компьютер",
+        "отключи комп",
+        "переведи устройство в сон",
+        "переведи устройство в спящий режим",
+        "устройство в сон",
+        "отправь устройство в спящий режим",
+        "отправь устройство в спячку",
+        "отключи устройство"
     ],
     "poweroff": [
         "выключайся",
@@ -212,7 +249,9 @@ VA_VOID_CMD_LIST: dict[str: list[str]] = {
         "выключить",
         "выключить нахуй",
         "выключись нахуй",
-        "закройся"
+        "закройся",
+        "вырубись",
+        "иди убейся"
     ]
 }
 
@@ -227,6 +266,7 @@ BASE_BROWSER: str = "google-chrome"
 BASE_URL: str = "http://python.org"
 YOUTUBE_URL: str = "https://www.youtube.com"
 BASE_GPT_URL: str = "https://openrouter.ai/api/v1"
+LOCALHOST_URL: str = "http://localhost:1234/v1"
 
 # LLM Models
 GPT_MODEL_LIST: list[str] = [
@@ -256,6 +296,12 @@ OPTIONS_MESSAGE: str = (
     "Please, select one of suggested options(b, f, lms): "
 )
 
+LLM_MODES = {
+    'b': "base",
+    'f': "free",
+    'lms': "lmstudio"
+}
+
 MODE_CHOOSING_MESSAGE: str = "Please, select one from suggested VA's work modes: "
 
 CHECKING_MESSAGE: str = "Кто ты?"
@@ -281,6 +327,7 @@ JOKER_LIST: list[str] = [
 TAKE_SCREENSHOT_ANSWER: str = "Снимок экрана сохранён"
 
 # Probabilities and constants
+OPERATION_SYSTEM: str = platform.platform()
 """
 The percentage of probability with which a command
 for an assistant is considered recognized.

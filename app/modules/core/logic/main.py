@@ -31,10 +31,12 @@ class VoiceAssistance:
             api_key,
             va_dialogue_history,
             base_gpt_url,
+            localhost_url,
             va_prompt,
             va_gpt_models,
             va_free_gpt_models,
             va_lmstudio_model,
+            va_llm_modes,
             llm_client_checking_message,
             va_wws,
             va_speaking_cmds,
@@ -82,12 +84,14 @@ class VoiceAssistance:
         self.api_key = api_key
         self.va_dialogue_history = va_dialogue_history
         self.base_gpt_url = base_gpt_url
+        self.localhost_url = localhost_url
         # Initializing an OpenAI client
         self.va_llm_client: OpenAI = OpenAI(
             api_key=self.api_key,
             base_url=self.base_gpt_url # base_url="https://api.proxyapi.ru/openai/v1",
         )
         self.va_prompt = va_prompt
+        self.va_llm_modes = va_llm_modes
         self.llm_client_checking_message = llm_client_checking_message
         self.va_gpt_models = va_gpt_models
         self.va_free_gpt_models = va_free_gpt_models
@@ -165,6 +169,7 @@ class VoiceAssistance:
             self.va_gpt_models,
             self.va_free_gpt_models,
             self.va_lmstudio_model,
+            self.va_llm_modes,
             self.llm_client_checking_message,
             self.va_wws,
             self.va_speaking_cmds,
@@ -174,6 +179,7 @@ class VoiceAssistance:
             self.tmodloader_path,
             self.goodbye_dpi_path,
             self.gallery_path,
+            self.localhost_url,
             self.base_url,
             self.youtube_url,
             self.va_executed_answers,
@@ -267,6 +273,8 @@ def main() -> None:
 
     dialogue_history: list = [] # list for storing dialog history
 
+    print(f"OS: {general_config.OPERATION_SYSTEM}")
+
     va_mode: str = choosing_va_mode()
 
     match va_mode:
@@ -274,7 +282,7 @@ def main() -> None:
             import app.modules.core.roles.jarvis_config as specific_config
 
         case "m":
-            import app.modules.core.roles.miku_config as specific_config
+            import app.modules.core.roles.mita_config as specific_config
 
         case _:
             import app.modules.core.roles.jarvis_config as specific_config
@@ -289,10 +297,12 @@ def main() -> None:
             api_key,
             dialogue_history,
             general_config.BASE_GPT_URL,
+            general_config.LOCALHOST_URL,
             specific_config.VA_PROMPT,
             general_config.GPT_MODEL_LIST,
             general_config.GPT_FREE_MODEL_LIST,
             general_config.LMSTUDIO_MODEL,
+            general_config.LLM_MODES,
             general_config.CHECKING_MESSAGE,
             specific_config.VA_WAKE_WORD_LIST,
             general_config.VA_SPEAKING_CMD_LIST,

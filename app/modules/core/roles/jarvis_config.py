@@ -99,7 +99,8 @@ VA_CENSURE_ANSWERS: list[str] = [
 VA_CALL_ANSWERS: list[str] = [
     "да, сэр",
     "слушаю, сэр",
-    "жду дальнейших указаний, сэр"
+    "жду дальнейших указаний, сэр",
+    "я работаю в штатном режиме, сэр"
 ]
 
 VA_POTENTIAL_CALL_ANSWERS = [

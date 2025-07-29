@@ -3,13 +3,14 @@
 This is a module for executing system commands for VA
 """
 
+import os
 import pyautogui
 import webbrowser
 import geocoder
 import num2words
 import datetime
 import subprocess as sp
-import os
+import psutil
 
 
 class SystemExecutor:
@@ -89,3 +90,10 @@ class SystemExecutor:
             print(f"Возникла ошибка при определении геолокации: {err}")
 
             return "нет информации", "нет информации" # "Не удалось определить широту", "Не удалось определить долготу"
+
+    def get_battery_charge(self) -> str:
+        battery_info = psutil.sensors_battery()
+        print(f"Текущий заряд батареи: {battery_info.percent}% \n"
+              f"Подключение к зарядке: {battery_info.power_plugged}")
+
+        return num2words.num2words(battery_info.percent, lang=self.language)

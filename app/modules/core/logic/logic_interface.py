@@ -29,6 +29,7 @@ class Core:
             va_gpt_models,
             va_free_gpt_models,
             va_lmstudio_model,
+            va_llm_modes,
             llm_client_checking_message,
             va_wws,
             va_speaking_cmds,
@@ -38,6 +39,7 @@ class Core:
             tmodloader_path,
             goodbye_dpi_path,
             gallery_path,
+            localhost_url,
             base_url,
             youtube_url,
             va_executed_answers,
@@ -71,6 +73,7 @@ class Core:
         self.va_gpt_models = va_gpt_models
         self.va_free_gpt_models = va_free_gpt_models
         self.va_lmstudio_model = va_lmstudio_model
+        self.va_llm_modes = va_llm_modes
         self.va_mod: str = self.set_mod("base") # choosing work mode for VA
 
         self.va_wws = va_wws
@@ -84,6 +87,7 @@ class Core:
         self.goodbye_dpi_path = goodbye_dpi_path
         self.gallery_path = gallery_path
 
+        self.localhost_url = localhost_url
         self.base_url = base_url
         self.youtube_url = youtube_url
 
@@ -107,6 +111,14 @@ class Core:
         self.va_screenshot_extension = va_screenshot_extension
         self.va_music = '' # start value of music is not defined
 
+        if self.va_mod == "free":
+            self.va_llm_client=Client()
+        elif self.va_mod == "lmstudio":
+            self.va_llm_client=OpenAI(
+                base_url=self.localhost_url,
+                api_key="lm-studio"
+            )
+
         self.adm = audio_detection_module
         self.asm = audio_synthesis_module
         self.state_interface: StateInterface = StateInterface()
@@ -122,7 +134,7 @@ class Core:
         return f"Core of {self.va_name} ({self.va_version}) with ID: {self.va_id}"
 
     # Getting debugging information
-    def get_debug_info(self, api_key, time):
+    def get_debug_info(self, api_key, time) -> None:
         print(
             f"{self.va_name} (v{self.va_version}) начал(а) свою работу ...\n"
             f"Api key: {api_key}\n"
@@ -321,6 +333,10 @@ class Core:
 
                     return text
 
+                case "loop_music":
+                    mixer.music.play(-1)
+                    text: str = random.choice(self.va_executed_answers)
+
                 case "turn_off_music":
                     mixer.music.stop()
                     text: str = random.choice(self.va_executed_answers)
@@ -335,10 +351,21 @@ class Core:
                                  f"{current_location[0]} градусов по широте, "
                                  f"{current_location[1]} градусов по долготе.")
 
+                case "get_battery_charge":
+                    battery_charge: str = self.system_executor.get_battery_charge()
+                    text: str = f"Текущий заряд батареи: {battery_charge} процентов."
+
                 case "lock_computer":
                     text: str = random.choice(self.va_executed_answers)
                     self.asm.va_speak(text)
                     self.system_executor.run_script("rundll32 user32.dll, LockWorkStation")
+
+                    return text
+
+                case "computer_sleep":
+                    text: str = random.choice(self.va_executed_answers)
+                    self.asm.va_speak(text)
+                    self.system_executor.run_script("rundll32.exe powrprof.dll,SetSuspendState 0,1,0")
 
                     return text
 
@@ -392,18 +419,11 @@ class Core:
 
         except Exception as err:
             print(err)
+
             return ''
 
     # Function for receiving a response from ChatGPT
     def generate_response(self, message: str, mod) -> str:
-        if mod == "free":
-            self.va_llm_client=Client()
-        elif mod == "lmstudio":
-            self.va_llm_client=OpenAI(
-                base_url="http://localhost:1234/v1",
-                api_key="lm-studio"
-            )
-
         try:
             # Adding instruction for communication style if it is new dialog
             if not self.va_dialogue_history:
@@ -464,21 +484,12 @@ class Core:
 
     # Function for obtaining a work mode for the assistant
     def get_mod(self) -> str:
-        mod: str = ''
         m = input(self.set_options_message)
 
-        while m not in ('b', 'f', 'lms'):
+        while m not in self.va_llm_modes.keys():
             m = input(self.set_options_message)
         else:
-            match m:
-                case 'b':
-                    mod = "base"
-
-                case 'f':
-                    mod = "free"
-
-                case 'lms':
-                    mod = "lmstudio"
+            mod: str = self.va_llm_modes[m]
 
         return mod
 
@@ -491,14 +502,20 @@ class Core:
                     mod
                 )
         ):  # If api key does not work, use free model
-            mod = "free"
             if not (
                     self.generate_response(
                         self.llm_client_checking_message,
                         "free"
                     )
-            ):
+            ): # If free api does not work, use local model
                 mod = "lmstudio"
+            else:
+                print("Base mode is not working. Please, choose one other mode.")
+
+                mod = self.get_mod()
+
+                if mod == "base":
+                    mod = "free"
         else:
             mod = self.get_mod()
 
@@ -508,23 +525,25 @@ class Core:
         return mod
 
     # Function for adding logs to file
-    def add_log(self, message, thinks, response, address="User"):
+    def add_log(self, message, thinks, response, address="User") -> None:
         try:
             with open("log.txt", "a") as log:
                 log.write(f"{address}: {message}\n")
                 log.write(f"{self.va_name} thinks: {thinks}\n")
                 log.write(f"{self.va_name}: {response}\n")
+                log.write("\n")
         except Exception as err:
             print(f"Ошибка при прочтении лог-файла: {err}. Создается новый лог-файл.")
             with open("log.txt", "w") as log:
                 log.write(f"{address}: {message}\n")
                 log.write(f"{self.va_name} thinks: {thinks}\n")
                 log.write(f"{self.va_name}: {response}\n")
+                log.write("\n")
 
         log.close()
 
     # Function for turning off the assistant
-    def poweroff(self):
+    def poweroff(self) -> None:
         text: str = random.choice(self.va_poweroff_messages)
         self.asm.va_speak(text)
         print(f"Ответ от {self.va_name}: {text}")
