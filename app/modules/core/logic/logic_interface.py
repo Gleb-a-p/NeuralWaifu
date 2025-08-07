@@ -3,8 +3,10 @@
 This module includes a VA's logical module(core)
 """
 
+import os
 from fuzzywuzzy import fuzz
 from g4f.client import Client
+from humanfriendly.terminal import message
 from openai import OpenAI
 from pygame import mixer
 import num2words
@@ -19,7 +21,9 @@ class Core:
             self,
             id,
             name,
+            system_name,
             version,
+            operation_system,
             audio_detection_module,
             audio_synthesis_module,
             set_options_message,
@@ -37,6 +41,7 @@ class Core:
             base_browser,
             terraria_path,
             tmodloader_path,
+            minecraft_path,
             goodbye_dpi_path,
             gallery_path,
             localhost_url,
@@ -62,7 +67,10 @@ class Core:
     ) -> None:
         self.va_id = id
         self.va_name = name
+        self.va_system_name = system_name
         self.va_version = version
+
+        self.operation_system = operation_system
 
         self.set_options_message = set_options_message
 
@@ -84,6 +92,7 @@ class Core:
         self.base_browser = base_browser
         self.terraria_path = terraria_path
         self.tmodloader_path = tmodloader_path
+        self.minecraft_path = minecraft_path
         self.goodbye_dpi_path = goodbye_dpi_path
         self.gallery_path = gallery_path
 
@@ -123,6 +132,8 @@ class Core:
         self.asm = audio_synthesis_module
         self.state_interface: StateInterface = StateInterface()
         self.system_executor: SystemExecutor = SystemExecutor(
+            self.va_system_name,
+            self.operation_system,
             self.base_browser,
             self.gallery_path,
             self.va_language,
@@ -131,14 +142,16 @@ class Core:
         )
 
     def __str__(self) -> str:
-        return f"Core of {self.va_name} ({self.va_version}) with ID: {self.va_id}"
+        return f"Core of {self.va_system_name} ({self.va_version}) with ID: {self.va_id}"
 
     # Getting debugging information
     def get_debug_info(self, api_key, time) -> None:
         print(
-            f"{self.va_name} (v{self.va_version}) начал(а) свою работу ...\n"
+            f"{self.va_system_name} (v{self.va_version}) начал(а) свою работу ...\n"
+            f"Имя: {self.va_name}\n"
             f"Api key: {api_key}\n"
             f"OpenAI client: {self.va_llm_client}\n"
+            f"OS: {self.operation_system}\n"
             f"Mod = {self.va_mod}\n"
             f"Время на запуск: {time:.2f} секунд"
         )
@@ -192,7 +205,7 @@ class Core:
                 response = result
 
             separated_response = response.lstrip("<think>").split("</think>")
-            thinks = "---"
+            thinks = "NONE"
 
             if len(separated_response) == 2:
                 thinks, response = separated_response[0], separated_response[1]
@@ -215,7 +228,10 @@ class Core:
 
     # Voice command recognition function
     def recognize_cmd(self, cmd: str) -> dict[str, str | int]:
-        rc = {"cmd": '', "percent": 0}
+        rc = {
+            "cmd": '',
+            "percent": 0
+        }
 
         for command, variants in self.va_speaking_cmds.items():
             for word in variants:
@@ -272,12 +288,23 @@ class Core:
                     self.system_executor.open_browser(self.youtube_url)
                     text: str = random.choice(self.va_executed_answers)
 
+                case "open_logs":
+                    self.system_executor.open_text_file(
+                        os.path.abspath("main.py")[:len(os.path.abspath("main.py")) - len("app/modules/core/logic/main.py")],
+                        "log.txt"
+                    )
+                    text: str = random.choice(self.va_executed_answers)
+
                 case "run_terraria":
                     self.system_executor.run_script(self.terraria_path)
                     text: str = random.choice(self.va_executed_answers)
 
                 case "run_tmodloader":
                     self.system_executor.run_script(self.tmodloader_path)
+                    text: str = random.choice(self.va_executed_answers)
+
+                case "run_minecraft":
+                    self.system_executor.run_script(self.minecraft_path)
                     text: str = random.choice(self.va_executed_answers)
 
                 case "run_goodbye_dpi":
@@ -434,7 +461,7 @@ class Core:
                             "content": self.va_prompt
                         }
                     )
-                    self.add_log(self.va_prompt, "---", "---", address="User")
+                    self.add_log(self.va_prompt, "NONE", "NONE", address="User")
                 else:
                     self.va_dialogue_history.append(
                         {
@@ -442,7 +469,7 @@ class Core:
                             "content": self.va_prompt
                         }
                     )
-                    self.add_log(self.va_prompt, "---", "---", address="System")
+                    self.add_log(self.va_prompt, "NONE", "NONE", address="System")
 
             self.va_dialogue_history.append(
                 {
@@ -495,28 +522,39 @@ class Core:
 
     # Function for correcting a work mode for the assistant
     def set_mod(self, mod) -> str:
-        # Checking the OpenAI client for correctness
-        if not(
-                self.generate_response(
+        base_mod_response = self.generate_response(
                     self.llm_client_checking_message,
                     mod
                 )
-        ):  # If api key does not work, use free model
-            if not (
-                    self.generate_response(
+
+        # Checking the OpenAI client for correctness
+        if not(base_mod_response):  # If api key does not work, use free model
+            free_mod_response = self.generate_response(
                         self.llm_client_checking_message,
                         "free"
                     )
-            ): # If free api does not work, use local model
+
+            if not (free_mod_response): # If free api does not work, use local model
+                lmstudio_mod_response = self.generate_response(
+                        self.llm_client_checking_message,
+                        "lmstudio"
+                    )
+
+                self.add_log(message=self.llm_client_checking_message, thinks="NONE", response=lmstudio_mod_response)
+
                 mod = "lmstudio"
             else:
                 print("Base mode is not working. Please, choose one other mode.")
+
+                self.add_log(message=self.llm_client_checking_message, thinks="NONE", response=free_mod_response)
 
                 mod = self.get_mod()
 
                 if mod == "base":
                     mod = "free"
         else:
+            self.add_log(message=self.llm_client_checking_message, thinks="NONE", response=base_mod_response)
+
             mod = self.get_mod()
 
         print(self.va_dialogue_history)
@@ -527,7 +565,7 @@ class Core:
     # Function for adding logs to file
     def add_log(self, message, thinks, response, address="User") -> None:
         try:
-            with open("log.txt", "a") as log:
+            with open("../../../etc/log.txt", "a") as log:
                 log.write(f"{address}: {message}\n")
                 log.write(f"{self.va_name} thinks: {thinks}\n")
                 log.write(f"{self.va_name}: {response}\n")
@@ -536,11 +574,15 @@ class Core:
         except Exception as err:
             print(f"Ошибка при прочтении лог-файла: {err}. Создается новый лог-файл.")
 
-            with open("log.txt", "w") as log:
-                log.write(f"{address}: {message}\n")
-                log.write(f"{self.va_name} thinks: {thinks}\n")
-                log.write(f"{self.va_name}: {response}\n")
-                log.write("\n")
+            try:
+                with open(f"../../../etc/log{random.randint(1, 100)}.txt", "w") as log:
+                    log.write(f"{address}: {message}\n")
+                    log.write(f"{self.va_name} thinks: {thinks}\n")
+                    log.write(f"{self.va_name}: {response}\n")
+                    log.write("\n")
+
+            except Exception as err:
+                print(f"Не удалось создать новый лог-файл. Ошибка: {err}")
 
         log.close()
 

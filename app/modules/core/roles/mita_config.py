@@ -5,6 +5,7 @@ This is a module with specific VA's settings for Mita
 
 # Base options
 VA_NAME: str = "Мита"
+VA_SYSTEM_NAME: str = "Mita"
 VA_ID: int = 1
 
 VA_WAKE_WORD_LIST: list[str] = [

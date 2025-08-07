@@ -8,7 +8,7 @@ import platform
 
 
 # Voice assistant
-VA_VERSION: str = "1.2.4b"
+VA_VERSION: str = "1.2.5b"
 
 VA_MODES: list[list[str]] = [
     ["j", "Jarvis"],
@@ -93,6 +93,12 @@ VA_VOID_CMD_LIST: dict[str: list[str]] = {
         "ютуб",
         "запусти ютуб"
     ],
+    "open_logs": [
+        "открой историю диалога",
+        "открой логи",
+        "покажи логи",
+        "логи"
+    ],
     "run_terraria": [
         "запусти террарию",
         "запусти терку",
@@ -104,6 +110,13 @@ VA_VOID_CMD_LIST: dict[str: list[str]] = {
         "запусти террарию с модами",
         "запусти т мод лоадер",
         "запусти мод лоадер"
+    ],
+    "run_minecraft": [
+        "майнкрафт",
+        "запусти майнкрафт",
+        "запусти майн",
+        "открой майнкрафт",
+        "минекрафт"
     ],
     "run_goodbye_dpi": [
         "запусти гудбай д п ай",
@@ -258,12 +271,13 @@ VA_VOID_CMD_LIST: dict[str: list[str]] = {
 # Links and file paths
 TERRARIA_PATH: str = 'C:/GOG Games/Terraria/Terraria.exe'
 TMODLOADER_PATH: str = '"C:/GOG Games/tModLoader/start-tModLoader.bat"'
+MINECRAFT_PATH: str = "C:/Users/gleba/Desktop/Minecraft.exe"
 RELATIVE_VA_PATH: str = "app\modules\core\logic\main.py"
 GOODBYE_DPI_PATH: str = "C:/Users/gleba/Desktop/goodbyedpi-0.2.3rc1-2/goodbyedpi-0.2.3rc1/1_russia_blacklist"
 CHROME_PATH: str = "C:/Program Files/Google/Chrome/Application/chrome.exe"
 GALLERY_PATH: str = "C:/Users/gleba/Desktop/Screenshots"
 BASE_BROWSER: str = "google-chrome"
-BASE_URL: str = "https://python.org"
+BASE_URL: str = "https://github.com/Gleb-a-p/NeuralWaifu" # "https://python.org"
 YOUTUBE_URL: str = "https://www.youtube.com"
 BASE_GPT_URL: str = "https://openrouter.ai/api/v1"
 LOCALHOST_URL: str = "http://localhost:1234/v1"
@@ -290,7 +304,7 @@ OPTIONS_MESSAGE: str = (
     "(your API_KEY will be used), high quality\n"
     "'f' - free mode\n"
     "(your API_KEY won't be used, free model), low quality\n"
-    "'lms' - lmstudio\n"
+    "'lms' - lmstudio mode\n"
     "(uses the computing power of your computer, not recommended on a weak computer), \n"
     "quality is adjustable and depends on the local machine and choosed LLM model\n"
     "Please, select one of suggested options(b, f, lms): "

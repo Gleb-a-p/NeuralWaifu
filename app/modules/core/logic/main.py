@@ -26,7 +26,9 @@ class VoiceAssistance:
             self,
             id,
             name,
+            system_name,
             version,
+            operation_system,
             set_options_message,
             api_key,
             va_dialogue_history,
@@ -44,6 +46,7 @@ class VoiceAssistance:
             base_browser,
             terraria_path,
             tmodloader_path,
+            minecraft_path,
             base_browser_path,
             goodbye_dpi_path,
             gallery_path,
@@ -77,7 +80,10 @@ class VoiceAssistance:
 
         self.va_id = id
         self.va_name = name
+        self.va_system_name = system_name
         self.va_version = version
+
+        self.operation_system = operation_system
 
         self.set_options_message = set_options_message
 
@@ -105,6 +111,7 @@ class VoiceAssistance:
         self.base_browser = base_browser
         self.terraria_path = terraria_path
         self.tmodloader_path = tmodloader_path
+        self.minecraft_path = minecraft_path
         self.base_browser_path = base_browser_path
         self.goodbye_dpi_path = goodbye_dpi_path
         self.gallery_path = gallery_path
@@ -159,7 +166,9 @@ class VoiceAssistance:
         self.NeuralWaifu = Core(
             self.va_id,
             self.va_name,
+            self.va_system_name,
             self.va_version,
+            self.operation_system,
             self.audio_detect_module,
             self.audio_synthes_module,
             self.set_options_message,
@@ -177,6 +186,7 @@ class VoiceAssistance:
             self.base_browser,
             self.terraria_path,
             self.tmodloader_path,
+            self.minecraft_path,
             self.goodbye_dpi_path,
             self.gallery_path,
             self.localhost_url,
@@ -216,17 +226,18 @@ class VoiceAssistance:
         self.end: float = time.time() # recording the end time of the program launch
 
     def __str__(self) -> str:
-        return f"Voice Assistant {self.va_name} ({self.va_version}) with ID: {self.va_id}"
+        return (f"Voice Assistant {self.va_system_name} ({self.va_version}) with ID: {self.va_id}. Settings: \n"
+                # f"Created a Voice Assistant with next settings: \n"
+                f" - Core: {self.NeuralWaifu}\n"
+                f" - GUI: {self.window}\n"
+                f" - Audio interface: {self.audio_detect_module} and {self.audio_synthes_module}\n"
+                f" - System interface: {self.NeuralWaifu.system_executor}\n"
+                f" - State interface: {self.NeuralWaifu.state_interface}")
 
-    def run(self) -> None:
+    def run(self) -> None: # Джарвис: штатный режим, сэр
         self.window.show()
 
         # Output debugging information
-        print("Created a Voice Assistant with next settings: \n"
-              f" - Core: {self.NeuralWaifu}\n"
-              f" - GUI: {self.window}\n"
-              f" - Audio interface: {self.audio_detect_module} and {self.audio_synthes_module}"
-        )
         self.NeuralWaifu.get_debug_info( self.api_key[:20] + "...", round(self.end - self.start, 1) )
 
         # Starting the event loop
@@ -289,10 +300,13 @@ def main() -> None:
 
     if not(specific_config.VA_ID in models_ids):
         print(f"VA's mode is {specific_config.VA_NAME}")
+
         VA: VoiceAssistance = VoiceAssistance(
             specific_config.VA_ID,
             specific_config.VA_NAME,
+            specific_config.VA_SYSTEM_NAME,
             general_config.VA_VERSION,
+            general_config.OPERATION_SYSTEM,
             general_config.OPTIONS_MESSAGE,
             api_key,
             dialogue_history,
@@ -310,6 +324,7 @@ def main() -> None:
             general_config.BASE_BROWSER,
             general_config.TERRARIA_PATH,
             general_config.TMODLOADER_PATH,
+            general_config.MINECRAFT_PATH,
             general_config.CHROME_PATH,
             general_config.GOODBYE_DPI_PATH,
             general_config.GALLERY_PATH,
@@ -346,7 +361,7 @@ def main() -> None:
 
     else:
         print("Операция не позволена. \n"
-              f"Не разрешен запуск модели с ID: {specific_config.VA_ID}. \n"
+              f"Отклонен запуск модели с ID: {specific_config.VA_ID}. \n"
               "Модель с таким ID уже запущена.")
 
     print(f"Принудительное завершение работы модели (ID: {specific_config.VA_ID})")
