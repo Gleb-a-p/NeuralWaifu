@@ -528,19 +528,23 @@ class Core:
                 )
 
         # Checking the OpenAI client for correctness
-        if not(base_mod_response):  # If api key does not work, use free model
+        if not base_mod_response:  # If api key does not work, use free model
             free_mod_response = self.generate_response(
                         self.llm_client_checking_message,
                         "free"
                     )
 
-            if not (free_mod_response): # If free api does not work, use local model
+            if not free_mod_response: # If free api does not work, use local model
                 lmstudio_mod_response = self.generate_response(
                         self.llm_client_checking_message,
                         "lmstudio"
                     )
 
-                self.add_log(message=self.llm_client_checking_message, thinks="NONE", response=lmstudio_mod_response)
+                self.add_log(
+                    message=self.llm_client_checking_message,
+                    thinks=lmstudio_mod_response.split("<think>")[0],
+                    response=lmstudio_mod_response.split("<think>")[-1]
+                )
 
                 mod = "lmstudio"
             else:
