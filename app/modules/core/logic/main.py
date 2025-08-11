@@ -212,7 +212,7 @@ class VoiceAssistance:
         )
 
         # Creating MainWindow
-        self.window: gui.MainWindow = gui.MainWindow(self.NeuralWaifu, self.va_system_name)
+        self.window: gui.MainWindow = gui.MainWindow(self.NeuralWaifu, self.va_system_name, self.va_name)
 
         # Fix the browser path
         webbrowser.register(
@@ -255,7 +255,7 @@ class VoiceAssistance:
 
 def create_va(specific_config, models_ids, api_key, dialogue_history) -> VoiceAssistance:
     if not(specific_config.VA_ID in models_ids):
-        print(f"VA's mode is {specific_config.VA_NAME}")
+        print(f"VA's mode is {specific_config.VA_SYSTEM_NAME}")
 
         VA: VoiceAssistance = VoiceAssistance(
             specific_config.VA_ID,
@@ -332,7 +332,7 @@ def get_modes_message() -> str:
     return choosing_message
 
 
-def choosing_va_mode() -> str:
+def choose_va_mode() -> str:
     mode: str = ''
 
     while mode not in general_config.VA_MODES[-1]:
@@ -354,7 +354,7 @@ def main() -> None:
 
     print(f"OS: {general_config.OPERATION_SYSTEM}")
 
-    va_mode: str = choosing_va_mode()
+    va_mode: str = choose_va_mode()
 
     match va_mode:
         case "j":
@@ -368,7 +368,7 @@ def main() -> None:
 
     VA = create_va(specific_config, models_ids, api_key, dialogue_history) # Creating VA
 
-    if VA != None:
+    if isinstance( VA, VoiceAssistance ):
         VA.run() # Джарвис работает в штатном режиме, сэр
         print(f"Принудительное завершение работы модели (ID: {specific_config.VA_ID})")
 

@@ -8,7 +8,7 @@ import platform
 
 
 # Voice assistant
-VA_VERSION: str = "1.2.5b"
+VA_VERSION: str = "1.2.6b"
 
 VA_MODES: list[list[str]] = [
     ["j", "Jarvis"],

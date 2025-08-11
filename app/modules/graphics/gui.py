@@ -70,10 +70,11 @@ class Ui_MainWindow(object):
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
-    def __init__(self, core, name) -> None:  # client, dialog, mod):
+    def __init__(self, core, system_name, name) -> None:  # client, dialog, mod):
         super().__init__()
 
         self.logic_core = core
+        self.va_system_name = system_name
         self.va_name = name
 
         self.setupUi(self, self.va_name)
@@ -115,7 +116,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 f"{self.va_name} " * ( not(self.logic_core.adm.va_wake_word_recognition(entered_message.split()[0])) ) + entered_message
             )
 
-            self.listWidget.addItem(f"{self.va_name}: {response}")
+            self.listWidget.addItem(f"{self.va_system_name}: {response}")
 
             # if self.mod == "base":
             #     self.listWidget.addItem(dialogue.generate_response(self.dialog, entered_message, self.mod, self.client))
@@ -132,6 +133,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             response = self.logic_core.va_respond(message)
 
-            self.listWidget.addItem(f"{self.va_name}: {response}")
+            self.listWidget.addItem(f"{self.va_system_name}: {response}")
 
         return response

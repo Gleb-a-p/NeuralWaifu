@@ -6,7 +6,6 @@ This module includes a VA's logical module(core)
 import os
 from fuzzywuzzy import fuzz
 from g4f.client import Client
-from humanfriendly.terminal import message
 from openai import OpenAI
 from pygame import mixer
 import num2words
@@ -237,17 +236,17 @@ class Core:
             for word in variants:
                 vrt = fuzz.ratio(cmd, word)
 
-                if vrt > rc['percent']:
-                    rc['cmd'] = command
-                    rc['percent'] = vrt
+                if vrt > rc["percent"]:
+                    rc["cmd"] = command
+                    rc["percent"] = vrt
 
         for command, variants in self.va_void_cmds.items():
             for word in variants:
                 vrt = fuzz.ratio(cmd, word)
 
-                if vrt > rc['percent']:
-                    rc['cmd'] = command
-                    rc['percent'] = vrt
+                if vrt > rc["percent"]:
+                    rc["cmd"] = command
+                    rc["percent"] = vrt
 
         return rc
 
