@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
+# coding: utf-8
 """
-This is main file, includes import
-of all necessary libraries and modules.
-You need run this file to run project.
+This is global module, includes full VA create tools
 """
 
 from openai import OpenAI
@@ -10,12 +8,10 @@ from PyQt6.QtWidgets import QApplication
 from pygame import mixer
 import subprocess as sp
 import random
-import configparser
 import webbrowser
 import time
 import sys
 
-import app.modules.core.logic.general_config as general_config # General configuration
 import app.modules.graphics.gui as gui # Graphical user interface
 from app.modules.audio.audio_interface import AudioDetection, AudioSynthesis # Audio interface
 from app.modules.core.logic.logic_interface import Core # Core of VA
@@ -253,7 +249,7 @@ class VoiceAssistance:
         )  # start listening to commands
 
 
-def create_va(specific_config, models_ids, api_key, dialogue_history) -> VoiceAssistance:
+def create_va(general_config, specific_config, models_ids, api_key, dialogue_history) -> VoiceAssistance:
     if not(specific_config.VA_ID in models_ids):
         print(f"VA's mode is {specific_config.VA_SYSTEM_NAME}")
 
@@ -321,57 +317,22 @@ def create_va(specific_config, models_ids, api_key, dialogue_history) -> VoiceAs
               "Модель с таким ID уже запущена.")
 
 
-def get_modes_message() -> str:
+def get_modes_message(va_modes, mode_choosing_message) -> str:
     choosing_message: str = ''
 
-    for mode, description in general_config.VA_MODES[:-1]:
+    for mode, description in va_modes:
         choosing_message += f"{mode}: {description}\n"
 
-    choosing_message = general_config.MODE_CHOOSING_MESSAGE + "\n" + choosing_message
+    choosing_message = mode_choosing_message + "\n" + choosing_message
 
     return choosing_message
 
 
-def choose_va_mode() -> str:
+def choose_va_mode(va_modes, mode_choosing_message) -> str:
     mode: str = ''
 
-    while mode not in general_config.VA_MODES[-1]:
-        choosing_message: str = get_modes_message()
+    while mode not in va_modes:
+        choosing_message: str = get_modes_message(va_modes, mode_choosing_message)
         mode = input(choosing_message)
 
     return mode
-
-
-def main() -> None:
-    # Reading data from the configuration file
-    conf: configparser.ConfigParser = configparser.ConfigParser()
-    conf.read("../../../etc/config.ini")
-    api_key: str = conf['DEFAULT']['Api_key']
-
-    models_ids: list = [] # list with ids of working models
-
-    dialogue_history: list = [] # list for storing dialog history
-
-    print(f"OS: {general_config.OPERATION_SYSTEM}")
-
-    va_mode: str = choose_va_mode()
-
-    match va_mode:
-        case "j":
-            import app.modules.core.roles.jarvis_config as specific_config
-
-        case "m":
-            import app.modules.core.roles.mita_config as specific_config
-
-        case _:
-            import app.modules.core.roles.jarvis_config as specific_config
-
-    VA = create_va(specific_config, models_ids, api_key, dialogue_history) # Creating VA
-
-    if isinstance( VA, VoiceAssistance ):
-        VA.run() # Джарвис работает в штатном режиме, сэр
-        print(f"Принудительное завершение работы модели (ID: {specific_config.VA_ID})")
-
-
-if __name__ == "__main__":
-    main()

@@ -289,7 +289,8 @@ class Core:
 
                 case "open_logs":
                     self.system_executor.open_text_file(
-                        os.path.abspath("main.py")[:len(os.path.abspath("main.py")) - len("app/modules/core/logic/main.py")],
+                        os.path.abspath("../../../main.py")[:len(os.path.abspath(
+                            "../../../main.py")) - len("app/modules/core/logic/main.py")],
                         "log.txt"
                     )
                     text: str = random.choice(self.va_executed_answers)

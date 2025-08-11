@@ -88,7 +88,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.pushButton.setCheckable(True)
 
     def __str__(self):
-        return f"Main window of {self.logic_core.va_name} (ID: {self.logic_core.va_id}) GUI"
+        return f"Main window of {self.logic_core.va_system_name} (ID: {self.logic_core.va_id}) GUI"
 
     def button_clicked(self) -> None:
         print("Clicked!")
