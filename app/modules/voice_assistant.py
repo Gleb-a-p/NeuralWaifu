@@ -320,7 +320,7 @@ def create_va(general_config, specific_config, models_ids, api_key, dialogue_his
 def get_modes_message(va_modes, mode_choosing_message) -> str:
     choosing_message: str = ''
 
-    for mode, description in va_modes:
+    for mode, description in va_modes[:-1]:
         choosing_message += f"{mode}: {description}\n"
 
     choosing_message = mode_choosing_message + "\n" + choosing_message
@@ -331,7 +331,7 @@ def get_modes_message(va_modes, mode_choosing_message) -> str:
 def choose_va_mode(va_modes, mode_choosing_message) -> str:
     mode: str = ''
 
-    while mode not in va_modes:
+    while mode not in va_modes[-1]:
         choosing_message: str = get_modes_message(va_modes, mode_choosing_message)
         mode = input(choosing_message)
 

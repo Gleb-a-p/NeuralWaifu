@@ -14,7 +14,7 @@ from app.modules.voice_assistant import VoiceAssistance, create_va, choose_va_mo
 def read_config() -> str:
     # Reading data from the configuration file
     conf: configparser.ConfigParser = configparser.ConfigParser()
-    conf.read("etc/config.ini")
+    conf.read("../../../etc/config.ini")
     api_key: str = conf['DEFAULT']['Api_key']
 
     return api_key
@@ -29,7 +29,7 @@ def main() -> None:
 
     print(f"OS: {general_config.OPERATION_SYSTEM}")
 
-    va_mode = choose_va_mode(general_config.VA_MODES[-1], general_config.MODE_CHOOSING_MESSAGE)
+    va_mode = choose_va_mode(general_config.VA_MODES, general_config.MODE_CHOOSING_MESSAGE)
 
     match va_mode:
         case "j":
