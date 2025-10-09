@@ -35,31 +35,39 @@ class AudioDetection:
 
     # Microphone listening function
     def va_listen(self, callback) -> None:
-        with sd.RawInputStream(
-                samplerate=self.samplerate,
-                blocksize=8000,
-                device=self.device,
-                dtype="int16",
-                channels=1,
-                callback=self.q_callback
-        ) as stream:
-            rec = vosk.KaldiRecognizer(self.model, self.samplerate)
+        print("Start audio listening...")
 
-            while True:
-                data = self.q.get()
+        try:
+            with sd.RawInputStream(
+                    samplerate=self.samplerate,
+                    blocksize=8000,
+                    device=self.device,
+                    dtype="int16",
+                    channels=1,
+                    callback=self.q_callback
+            ) as stream:
+                rec = vosk.KaldiRecognizer(self.model, self.samplerate)
+                run = True
 
-                if rec.AcceptWaveform(data):
-                    # Suspend the microphone listening while the assistant is responding
-                    stream.stop()
-                    print("Аудиоввод приостановлен")
+                while run:
+                    data = self.q.get()
 
-                    res = callback(
-                        json.loads(rec.Result())["text"],
-                    )
+                    if rec.AcceptWaveform(data):
+                        # Suspend the microphone listening while the assistant is responding
+                        stream.stop()
+                        print("Аудиоввод приостановлен")
 
-                    # Resume listening to the microphone
-                    stream.start()
-                    print("Аудиоввод возобновлен")
+                        res = callback(
+                            json.loads(rec.Result())["text"],
+                        )
+
+                        # Resume listening to the microphone
+                        stream.start()
+                        print("Аудиоввод возобновлен")
+
+        except Exception as err:
+            print("Audio listening has been break.\n"
+                  f"Error: {err}")
 
     # Function for recognizing the assistant's name in a speech segment
     def va_wake_word_recognition(self, word: str) -> bool:

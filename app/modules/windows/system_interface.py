@@ -36,28 +36,33 @@ class SystemExecutor:
         return f"{self.system_name} system interface for OS: {self.operation_system}"
 
     def get_current_time(self) -> str:
-        now = datetime.datetime.now()
-        text = (f"Сейчас {num2words.num2words(now.hour, lang=self.language)} "
-                f"{num2words.num2words(now.minute, lang=self.language)} "
+        cur_time = datetime.datetime.now()
+        text = (f"Сейчас {num2words.num2words(cur_time.hour, lang=self.language)} "
+                f"{num2words.num2words(cur_time.minute, lang=self.language)} "
                 "по системному времени.")
 
         return text
 
     def take_screenshot(self) -> None:
-        gallery = os.listdir(self.gallery_path)
-        last_screenshot_ind = -1
+        # gallery = os.listdir(self.gallery_path)
+        # last_screenshot_ind = -1
 
-        if gallery:
-            last_screenshot = os.listdir(self.gallery_path)[-1].lstrip(self.screenshot_name).strip(self.screenshot_extension)
-            last_screenshot_ind = int( last_screenshot + "0" * (last_screenshot == '') )
+        # if gallery:
+        #     last_screenshot = os.listdir(self.gallery_path)[-1].lstrip(self.screenshot_name).strip(self.screenshot_extension)
+        #     last_screenshot_ind = int( last_screenshot + "0" * (last_screenshot == '') )
 
         screenshot: pyautogui.screenshot = pyautogui.screenshot()
-        screenshot_path = self.gallery_path + '/' + self.screenshot_name + str(last_screenshot_ind + 1) + self.screenshot_extension
-
-        print(f"{self.system_name} сделал снимок экрана")
-        print(f"Снимок экрана сохранен как { screenshot_path }")
+        # screenshot_path = self.gallery_path + '/' + self.screenshot_name + str(last_screenshot_ind + 1) + self.screenshot_extension
+        cur_time = datetime.datetime.now()
+        cur_data = datetime.date.today()
+        screenshot_path = (self.gallery_path + '/' + self.screenshot_name +
+                           f"{cur_data.year}-{cur_data.month}-{cur_data.day}_{cur_time.hour}-{cur_time.minute}-{cur_time.second}" +
+                           self.screenshot_extension)
 
         screenshot.save( screenshot_path )
+
+        print(f"{self.system_name} сделал снимок экрана")
+        print(f"Снимок экрана сохранен как {screenshot_path}")
 
     def run_script(self, script_file: str) -> None:
         try:
@@ -120,6 +125,7 @@ class SystemExecutor:
             if geo_location.ok:
                 location = geo_location.latlng
                 latitude, longitude = location
+
                 print(f"Location: {location}\n"
                       f"Широта: {latitude},\n"
                       f"Долгота: {longitude}")

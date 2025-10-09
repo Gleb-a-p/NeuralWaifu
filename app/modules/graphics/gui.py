@@ -11,14 +11,14 @@ This is a GUI module
 
 from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtWidgets import QMainWindow
+from PyQt6.QtWidgets import QApplication
 import random
 import time
-
-from app.modules.core.logic.general_config import VA_VERSION
+import sys
 
 
 class Ui_MainWindow(object):
-    def setupUi(self, MainWindow, va_name):
+    def setupUi(self, MainWindow, va_name, va_ver):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(474, 304)
         MainWindow.setAnimated(True)
@@ -61,23 +61,22 @@ class Ui_MainWindow(object):
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
         self.va_name = va_name
+        self.va_ver = va_ver
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", f"{self.va_name} {VA_VERSION}"))
+        MainWindow.setWindowTitle(_translate("MainWindow", f"{MainWindow.logic_core.va_name} {MainWindow.logic_core.va_version}"))
         self.lineEdit.setPlaceholderText(_translate("MainWindow", "Enter your message"))
         self.pushButton.setText(_translate("MainWindow", "Send message"))
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
-    def __init__(self, core, system_name, name) -> None:  # client, dialog, mod):
+    def __init__(self, core) -> None:  # client, dialog, mod):
         super().__init__()
 
         self.logic_core = core
-        self.va_system_name = system_name
-        self.va_name = name
 
-        self.setupUi(self, self.va_name)
+        self.setupUi(self, self.logic_core.va_system_name, self.logic_core.va_version)
 
         # self.client = client
         # self.dialog = dialog
@@ -87,7 +86,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.pushButton.clicked.connect(self.button_clicked)
         self.pushButton.setCheckable(True)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Main window of {self.logic_core.va_system_name} (ID: {self.logic_core.va_id}) GUI"
 
     def button_clicked(self) -> None:
@@ -113,10 +112,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             # response = self.logic_core.va_respond(
             #     f"{self.va_name} " * (not (entered_message.startswith(self.va_name))) + entered_message)
             response = self.logic_core.va_respond(
-                f"{self.va_name} " * ( not(self.logic_core.adm.va_wake_word_recognition(entered_message.split()[0])) ) + entered_message
+                f"{self.logic_core.va_name} " * ( not(self.logic_core.adm.va_wake_word_recognition(entered_message.split()[0])) ) + entered_message
             )
 
-            self.listWidget.addItem(f"{self.va_system_name}: {response}")
+            self.listWidget.addItem(f"{self.logic_core.va_system_name}: {response}")
 
             # if self.mod == "base":
             #     self.listWidget.addItem(dialogue.generate_response(self.dialog, entered_message, self.mod, self.client))
@@ -133,6 +132,35 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             response = self.logic_core.va_respond(message)
 
-            self.listWidget.addItem(f"{self.va_system_name}: {response}")
+            self.listWidget.addItem(f"{self.logic_core.va_system_name}: {response}")
 
         return response
+
+
+class GUI:
+    def __init__(self, core) -> None:
+        self.logic_core = core
+
+        # Creating an application(GUI)
+        self.app: QApplication = QApplication(sys.argv)
+
+        # Creating MainWindow
+        print("Initialization of Main Window...")
+        self.main_window: MainWindow = MainWindow(self.logic_core)
+        print(f"Created {self.main_window}")
+
+    def __str__(self):
+        return f"GUI Module of {self.logic_core.va_system_name} (ID: {self.logic_core.va_id})"
+
+    def run(self) -> None:
+        self.main_window.show()
+
+        try:
+            print("Starting event loop...")
+            # Starting the event loop
+            # sp.Popen(["python", "self.app.exec()"])
+            self.app.exec()
+
+        except Exception as err:
+            print("Event loop has been break.\n"
+                  f"Error: {err}")

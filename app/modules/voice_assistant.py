@@ -4,15 +4,13 @@ This is global module, includes full VA create tools
 """
 
 from openai import OpenAI
-from PyQt6.QtWidgets import QApplication
 from pygame import mixer
 import subprocess as sp
 import random
 import webbrowser
 import time
-import sys
 
-import app.modules.graphics.gui as gui # Graphical user interface
+from app.modules.graphics.gui import GUI # Graphical user interface
 from app.modules.audio.audio_interface import AudioDetection, AudioSynthesis # Audio interface
 from app.modules.core.logic.logic_interface import Core # Core of VA
 
@@ -141,9 +139,6 @@ class VoiceAssistance:
         self.va_relative_path = va_relative_path
         self.va_speaker = va_speaker
 
-        # Creating an application(GUI)
-        self.app: QApplication = QApplication(sys.argv)
-
         # Creating audio module of VA
         self.audio_detect_module = AudioDetection(
             self.detecting_samplerate,
@@ -207,8 +202,10 @@ class VoiceAssistance:
             self.va_screenshot_extension
         )
 
-        # Creating MainWindow
-        self.window: gui.MainWindow = gui.MainWindow(self.NeuralWaifu, self.va_system_name, self.va_name)
+        # Creating GUI
+        self.gui: GUI = GUI(
+            self.NeuralWaifu
+        )
 
         # Fix the browser path
         webbrowser.register(
@@ -225,27 +222,24 @@ class VoiceAssistance:
         return (f"Voice Assistant {self.va_system_name} ({self.va_version}) with ID: {self.va_id}. Settings: \n"
                 # f"Created a Voice Assistant with next settings: \n"
                 f" - Core: {self.NeuralWaifu}\n"
-                f" - GUI: {self.window}\n"
+                f" - GUI: {self.gui}\n"
                 f" - Audio interface: {self.audio_detect_module} and {self.audio_synthes_module}\n"
                 f" - System interface: {self.NeuralWaifu.system_executor}\n"
                 f" - State interface: {self.NeuralWaifu.state_interface}")
 
     def run(self) -> None: # Джарвис: штатный режим, сэр
-        self.window.show()
-
         # Output debugging information
         self.NeuralWaifu.get_debug_info( self.api_key[:20] + "...", round(self.end - self.start, 1) )
 
-        # Starting the event loop
-        # sp.Popen(["python", "self.app.exec()"])
-        self.app.exec()
+        # Running GUI
+        self.gui.run()
 
         # Starting the voice assistant
         self.audio_synthes_module.va_speak(
             random.choice(self.va_greetings)
         )  # greeting at startup
         self.audio_detect_module.va_listen(
-            self.window.response_to_audio # self.NeuralWaifu.va_respond,
+            self.gui.main_window.response_to_audio # self.NeuralWaifu.va_respond,
         )  # start listening to commands
 
 

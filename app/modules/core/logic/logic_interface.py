@@ -149,7 +149,8 @@ class Core:
             f"{self.va_system_name} (v{self.va_version}) начал(а) свою работу ...\n"
             f"Имя: {self.va_name}\n"
             f"Api key: {api_key}\n"
-            f"OpenAI client: {self.va_llm_client}\n"
+            f"OpenAI Client: {self.va_llm_client}\n"
+            f"LMStudio Model: {self.va_lmstudio_model}\n"
             f"OS: {self.operation_system}\n"
             f"Mod = {self.va_mod}\n"
             f"Время на запуск: {time:.2f} секунд"
@@ -172,7 +173,7 @@ class Core:
             cmd = self.recognize_cmd(self.filter_cmd(message))
             print(cmd)
 
-            response = ''
+            response, thinks = '', "NONE"
 
             if (
                     cmd["cmd"] not in self.va_speaking_cmds.keys() or
@@ -187,7 +188,15 @@ class Core:
                         mod=self.va_mod
                     )
 
+                    separated_response = response.lstrip("<think>").split("</think>")
+
+                    if len(separated_response) == 2:
+                        thinks, response = separated_response[0], separated_response[1]
+                    elif len(separated_response) == 1:
+                        response = separated_response[0]
+
                     corrected_response: str = self.correct_response(response)
+
                     print(corrected_response)
 
                     self.asm.va_speak(corrected_response)
@@ -203,13 +212,6 @@ class Core:
                 )
                 response = result
 
-            separated_response = response.lstrip("<think>").split("</think>")
-            thinks = "NONE"
-
-            if len(separated_response) == 2:
-                thinks, response = separated_response[0], separated_response[1]
-            elif len(separated_response) == 1:
-                response = separated_response[0]
             self.add_log(message, thinks, response)
 
             return response

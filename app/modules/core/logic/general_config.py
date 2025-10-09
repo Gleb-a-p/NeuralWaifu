@@ -58,7 +58,8 @@ VA_SPEAKING_CMD_LIST: dict[str: list[str]] = {
         "ты дурак",
         "ты бесполезный",
         "ты баран",
-        "ты идиот"
+        "ты идиот",
+        "ты тупой"
     ],
     "call": [
         "ты тут",
@@ -297,6 +298,10 @@ GPT_FREE_MODEL_LIST: list[str] = [
 ]
 
 LMSTUDIO_MODEL: str = "deepseek-r1-0528-qwen3-8b"
+# Available options:
+#  - "deepseek-r1-distill-qwen-1.5b"
+#  - /"deepseek-coder-6.7b-instruct"
+#  - "deepseek-r1-0528-qwen3-8b"
 
 OPTIONS_MESSAGE: str = (
     "Options:\n"
