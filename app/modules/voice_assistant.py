@@ -3,6 +3,7 @@
 This is global module, includes full VA create tools
 """
 
+import os
 from openai import OpenAI
 from pygame import mixer
 import subprocess as sp
@@ -41,6 +42,7 @@ class VoiceAssistance:
             terraria_path,
             tmodloader_path,
             minecraft_path,
+            tlauncher_path,
             base_browser_path,
             goodbye_dpi_path,
             gallery_path,
@@ -106,6 +108,7 @@ class VoiceAssistance:
         self.terraria_path = terraria_path
         self.tmodloader_path = tmodloader_path
         self.minecraft_path = minecraft_path
+        self.tlauncher_path = tlauncher_path
         self.base_browser_path = base_browser_path
         self.goodbye_dpi_path = goodbye_dpi_path
         self.gallery_path = gallery_path
@@ -178,6 +181,7 @@ class VoiceAssistance:
             self.terraria_path,
             self.tmodloader_path,
             self.minecraft_path,
+            self.tlauncher_path,
             self.goodbye_dpi_path,
             self.gallery_path,
             self.localhost_url,
@@ -271,6 +275,7 @@ def create_va(general_config, specific_config, models_ids, api_key, dialogue_his
             general_config.TERRARIA_PATH,
             general_config.TMODLOADER_PATH,
             general_config.MINECRAFT_PATH,
+            general_config.TLAUNCHER_PATH,
             general_config.CHROME_PATH,
             general_config.GOODBYE_DPI_PATH,
             general_config.GALLERY_PATH,
@@ -311,10 +316,11 @@ def create_va(general_config, specific_config, models_ids, api_key, dialogue_his
               "Модель с таким ID уже запущена.")
 
 
-def get_modes_message(va_modes, mode_choosing_message) -> str:
+def get_roles_message(va_roles, mode_choosing_message) -> str:
     choosing_message: str = ''
+    # va_modes = [(mode[0], mode.lstrip("_").rstrip("config.py")) for mode in os.listdir(os.path.abspath)]
 
-    for mode, description in va_modes[:-1]:
+    for mode, description in va_roles[:-1]:
         choosing_message += f"{mode}: {description}\n"
 
     choosing_message = mode_choosing_message + "\n" + choosing_message
@@ -322,11 +328,11 @@ def get_modes_message(va_modes, mode_choosing_message) -> str:
     return choosing_message
 
 
-def choose_va_mode(va_modes, mode_choosing_message) -> str:
+def choose_va_role(va_roles, mode_choosing_message) -> str:
     mode: str = ''
 
-    while mode not in va_modes[-1]:
-        choosing_message: str = get_modes_message(va_modes, mode_choosing_message)
+    while mode not in va_roles[-1]:
+        choosing_message: str = get_roles_message(va_roles, mode_choosing_message)
         mode = input(choosing_message)
 
     return mode

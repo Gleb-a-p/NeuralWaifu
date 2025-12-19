@@ -41,6 +41,7 @@ class Core:
             terraria_path,
             tmodloader_path,
             minecraft_path,
+            tlauncher_path,
             goodbye_dpi_path,
             gallery_path,
             localhost_url,
@@ -92,6 +93,7 @@ class Core:
         self.terraria_path = terraria_path
         self.tmodloader_path = tmodloader_path
         self.minecraft_path = minecraft_path
+        self.tlauncher_path = tlauncher_path
         self.goodbye_dpi_path = goodbye_dpi_path
         self.gallery_path = gallery_path
 
@@ -307,6 +309,10 @@ class Core:
 
                 case "run_minecraft":
                     self.system_executor.run_script(self.minecraft_path)
+                    text: str = random.choice(self.va_executed_answers)
+
+                case "run_tlauncher":
+                    self.system_executor.run_script(self.tlauncher_path)
                     text: str = random.choice(self.va_executed_answers)
 
                 case "run_goodbye_dpi":

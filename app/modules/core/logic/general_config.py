@@ -96,6 +96,7 @@ VA_VOID_CMD_LIST: dict[str: list[str]] = {
     ],
     "open_logs": [
         "открой историю диалога",
+        "открой лог файл",
         "открой логи",
         "покажи логи",
         "логи"
@@ -118,6 +119,13 @@ VA_VOID_CMD_LIST: dict[str: list[str]] = {
         "запусти майн",
         "открой майнкрафт",
         "минекрафт"
+    ],
+    "run_tlauncher": [
+        "пиратский майнкрафт",
+        "запусти пиратский майнкрафт",
+        "пиратский минекрафт",
+        "т лаунчер",
+        "запусти т лаунчер",
     ],
     "run_goodbye_dpi": [
         "запусти гудбай д п ай",
@@ -273,6 +281,7 @@ VA_VOID_CMD_LIST: dict[str: list[str]] = {
 TERRARIA_PATH: str = 'C:/GOG Games/Terraria/Terraria.exe'
 TMODLOADER_PATH: str = '"C:/GOG Games/tModLoader/start-tModLoader.bat"'
 MINECRAFT_PATH: str = "C:/Users/gleba/Desktop/Minecraft.exe"
+TLAUNCHER_PATH: str = "C:/Users\gleba\AppData\Roaming\.minecraft\TLauncher.exe"
 RELATIVE_VA_PATH: str = "app\modules\core\logic\main.py"
 GOODBYE_DPI_PATH: str = "C:/Users/gleba/Desktop/goodbyedpi-0.2.3rc1-2/goodbyedpi-0.2.3rc1/1_russia_blacklist"
 CHROME_PATH: str = "C:/Program Files/Google/Chrome/Application/chrome.exe"
@@ -351,7 +360,7 @@ OPERATION_SYSTEM: str = platform.platform()
 The percentage of probability with which a command
 for an assistant is considered recognized.
 """
-CMD_PERCENT_DETECTION: int = 50 # 55
+CMD_PERCENT_DETECTION: int = 55 # 50
 """
 The percentage of probability with which
 the assistant's name is considered recognized.
